@@ -1,0 +1,14 @@
+glfw-2.8.0.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+glfw-2.8.0.dist-info/LICENSE.txt,sha256=g-Z1p3FOsB2x7XXO3PNJq53ZYweC-BwIFhy1jMZ8oco,1085
+glfw-2.8.0.dist-info/METADATA,sha256=7XmOxdOdDUqQ2pJyXyPqCIEYrim85Z8mKi3kcZKlzew,5372
+glfw-2.8.0.dist-info/RECORD,,
+glfw-2.8.0.dist-info/WHEEL,sha256=VtcR6Vz36s_TDEumCthFuKoOSDzvgec_1engxkxpyYM,428
+glfw-2.8.0.dist-info/top_level.txt,sha256=n6GNY584FzIdaCsyFH_mQw_kXzRH9bZ9wYb8VvDeT3k,5
+glfw/GLFW.py,sha256=5Od1X0AEsFdXrmB0Xmcym5NpU6Dl32QfHwS_VhYGRP8,19896
+glfw/__init__.py,sha256=zDmr54Qud4XCz0xmTjsGe6uAXEBxK_0yucT6ajBPWvI,115754
+glfw/__pycache__/GLFW.cpython-313.pyc,,
+glfw/__pycache__/__init__.cpython-313.pyc,,
+glfw/__pycache__/library.cpython-313.pyc,,
+glfw/glfw3.dll,sha256=zjKE91wGzR5lgEm7StXCmo__paom-lPsKskjJeMB2H0,208384
+glfw/library.py,sha256=j4mDWWZzMMfh4OCT7c-ZJo-i5sm4vvNg80ERZvLkzrg,8703
+glfw/msvcr120.dll,sha256=DQC_F1apVnlxXpPcgrGzGZR3PQKfu9Tg6FE27wgrhqk,963744
