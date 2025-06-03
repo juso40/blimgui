@@ -1,22 +1,23 @@
 from imgui_bundle import hello_imgui, immapp  # type: ignore
-from mods_base import Game
-from unrealsdk import logging
-from unrealsdk.hooks import Type, add_hook
+from unrealsdk import logging  # type: ignore
+from mods_base import Game  # type: ignore
+from unrealsdk.hooks import Type, add_hook  # type: ignore
 
 from .backend import DrawCallback, RenderBackend
 
-HOOK_ADDRESSES = {
-    Game.Willow1: "Engine.GameViewportClient:Tick",
-    Game.Willow2: "WillowGame.WillowGameViewportClient:Tick",
-}
-
-
 class HookBasedBackend(RenderBackend):
     def initialize(self) -> None:
-        game_tree = Game.get_tree()
-        if (hook_addr:=HOOK_ADDRESSES.get(game_tree)) is None:
+        HOOK_ADDRESSES = {
+            "BL1": "Engine.GameViewportClient:Tick",
+            "Willow2": "WillowGame.WillowGameViewportClient:Tick"
+        }
+        
+        game_tree = Game.get_tree().name
+        hook_addr = HOOK_ADDRESSES.get(game_tree)
+        
+        if not hook_addr:
             raise RuntimeError(f"Unsupported game: {game_tree}")
-
+        
         add_hook(
             hook_addr,
             Type.POST_UNCONDITIONAL,
@@ -57,6 +58,9 @@ class HookBasedBackend(RenderBackend):
     def render(self, *_) -> None:  # noqa: ANN002
         if not hello_imgui.is_using_hello_imgui():
             return
+        
+        self.apply_theme()
+        
         try:
             immapp.manual_render.render()
         except Exception as e:  # noqa: BLE001

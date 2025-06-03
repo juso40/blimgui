@@ -1,0 +1,84 @@
+# Marshmallow Theme
+# Soft pastels, light and airy feel
+
+# Backgrounds
+window_bg: 0.96 0.96 0.98 1.00
+# Off-white / very light pastel gray
+child_bg: 0.97 0.97 0.99 1.00
+popup_bg: 0.94 0.94 0.96 0.98
+
+# Text
+text: 0.25 0.25 0.30 1.00
+# Dark gray for readability
+text_disabled: 0.60 0.60 0.65 1.00
+text_selected_bg: 0.98 0.75 0.80 0.40
+# Pastel pink selection
+
+# Borders
+border: 0.85 0.85 0.90 1.00
+# Very light gray / subtle pastel
+border_shadow: 0.00 0.00 0.00 0.00
+
+# Frame Backgrounds
+frame_bg: 0.90 0.90 0.92 1.00
+# Very light gray
+frame_bg_hovered: 0.92 0.92 0.94 1.00
+frame_bg_active: 0.88 0.88 0.90 1.00
+
+# Titles
+title_bg: 0.88 0.88 0.90 1.00
+# Light gray
+title_bg_active: 0.75 0.90 0.80 1.00
+# Soft pastel green
+title_bg_collapsed: 0.88 0.88 0.90 1.00
+
+# Buttons
+button: 0.98 0.75 0.80 1.00
+# Pastel Pink
+button_hovered: 1.00 0.80 0.85 1.00
+# Lighter Pastel Pink
+button_active: 0.95 0.70 0.75 1.00
+# Darker Pastel Pink
+
+# Headers
+header: 0.92 0.92 0.94 1.00
+# Light gray
+header_hovered: 0.70 0.85 0.98 1.00
+# Pastel Blue on hover
+header_active: 0.65 0.80 0.95 1.00
+# Darker Pastel Blue
+
+# CheckMark
+check_mark: 0.98 0.95 0.70 1.00
+# Pastel Yellow
+
+# Slider
+slider_grab: 0.70 0.85 0.98 1.00
+# Pastel Blue
+slider_grab_active: 0.65 0.80 0.95 1.00
+# Darker Pastel Blue
+
+# Separator
+separator: 0.85 0.85 0.90 1.00
+separator_hovered: 0.80 0.80 0.85 1.00
+separator_active: 0.98 0.75 0.80 1.00
+
+# Resize Grip
+resize_grip: 0.92 0.92 0.94 0.80
+resize_grip_hovered: 0.95 0.95 0.97 0.90
+resize_grip_active: 0.98 0.75 0.80 0.95
+
+# Tabs
+tab: 0.96 0.96 0.98 1.00
+# Off-white base
+tab_hovered: 0.70 0.85 0.98 1.00
+# Pastel blue hover
+tab_active: 0.90 0.90 0.92 1.00
+# Light gray for active tab
+tab_selected: 0.90 0.90 0.92 1.00
+tab_unfocused: 0.98 0.98 1.00 0.97
+tab_unfocused_active: 0.96 0.96 0.98 1.00
+
+# Other
+drag_drop_target: 0.98 0.75 0.80 0.90
+nav_highlight: 0.70 0.85 0.98 1.00

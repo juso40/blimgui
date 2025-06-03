@@ -1,0 +1,66 @@
+# Ocean Deep Theme
+# Various shades of blue, from deep to light, with aquatic accents
+
+# Backgrounds
+window_bg: 0.02 0.05 0.15 0.98
+child_bg: 0.03 0.06 0.17 0.98
+popup_bg: 0.01 0.04 0.12 0.96
+
+# Text
+text: 0.75 0.85 0.90 1.00
+text_disabled: 0.40 0.45 0.50 1.00
+text_selected_bg: 0.10 0.50 0.60 0.40
+
+# Borders
+border: 0.10 0.30 0.50 0.80
+border_shadow: 0.00 0.00 0.00 0.00
+
+# Frame Backgrounds
+frame_bg: 0.04 0.08 0.20 1.00
+frame_bg_hovered: 0.06 0.10 0.25 1.00
+frame_bg_active: 0.05 0.09 0.22 1.00
+
+# Titles
+title_bg: 0.05 0.10 0.25 1.00
+title_bg_active: 0.10 0.20 0.40 1.00
+title_bg_collapsed: 0.05 0.10 0.25 1.00
+
+# Buttons
+button: 0.10 0.50 0.60 1.00
+button_hovered: 0.15 0.60 0.70 1.00
+button_active: 0.05 0.40 0.50 1.00
+
+# Headers
+header: 0.10 0.20 0.40 1.00
+# Light seafoam for hover/active
+header_hovered: 0.50 0.80 0.75 1.00
+header_active: 0.40 0.70 0.65 1.00
+
+# CheckMark
+check_mark: 0.40 0.70 0.90 1.00
+
+# Slider
+slider_grab: 0.15 0.60 0.70 1.00
+slider_grab_active: 0.20 0.70 0.80 1.00
+
+# Separator
+separator: 0.10 0.30 0.50 0.80
+separator_hovered: 0.15 0.40 0.60 1.00
+separator_active: 0.10 0.50 0.60 1.00
+
+# Resize Grip
+resize_grip: 0.10 0.20 0.40 0.80
+resize_grip_hovered: 0.15 0.25 0.50 0.90
+resize_grip_active: 0.10 0.50 0.60 0.95
+
+# Tabs
+tab: 0.08 0.15 0.30 1.00
+tab_hovered: 0.50 0.80 0.75 1.00
+tab_active: 0.10 0.20 0.40 1.00
+tab_selected: 0.10 0.20 0.40 1.00
+tab_unfocused: 0.04 0.08 0.20 0.97
+tab_unfocused_active: 0.08 0.15 0.30 1.00
+
+# Other
+drag_drop_target: 0.50 0.80 0.75 0.90
+nav_highlight: 0.50 0.80 0.75 1.00

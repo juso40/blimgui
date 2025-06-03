@@ -1,7 +1,7 @@
 import threading
 
 from imgui_bundle import hello_imgui, immapp  # type: ignore
-from unrealsdk import logging
+from unrealsdk import logging  # type: ignore
 
 from .backend import DrawCallback, RenderBackend
 
@@ -66,6 +66,8 @@ class ThreadBasedBackend(RenderBackend):
 
     def render(self, *_) -> None:  # noqa: ANN002
         with self._lock:
+            self.apply_theme()
+            
             if self._should_close:
                 hello_imgui.get_runner_params().app_shall_exit = True
                 return
