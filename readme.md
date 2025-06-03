@@ -74,20 +74,58 @@ You can comment lines using `#`. Invalid lines are skipped.
 
 ### ✅ Supported `imgui.Col_` Attributes
 
-Only the following names are supported:
+| Name                     | Description                                               |
+|--------------------------|-----------------------------------------------------------|
+| `window_bg`              | Background color of windows                               |
+| `child_bg`               | Background color of child windows                         |
+| `border`                 | Border color                                              |
+| `border_shadow`          | Border shadow color (rarely used)                         |
+| `button`                 | Normal button color                                       |
+| `button_hovered`         | Button color on hover                                     |
+| `button_active`          | Button color when held/active                             |
+| `check_mark`             | Color of checkboxes' check marks                          |
+| `frame_bg`               | Background of input fields and sliders                    |
+| `frame_bg_hovered`       | Background when hovered                                   |
+| `frame_bg_active`        | Background when active (clicked/focused)                  |
+| `header`                 | Collapsing header background                              |
+| `header_hovered`         | Collapsing header on hover                                |
+| `header_active`          | Collapsing header when open                               |
+| `menu_bar_bg`            | Background of menu bars                                   |
+| `modal_window_dim_bg`    | Background dimming color for modal dialogs                |
+| `popup_bg`               | Background of popups                                      |
+| `resize_grip`            | Color of resize grip                                      |
+| `resize_grip_hovered`    | Resize grip on hover                                      |
+| `resize_grip_active`     | Resize grip when dragging                                 |
+| `scrollbar_bg`           | Scrollbar background                                      |
+| `scrollbar_grab`         | Scrollbar handle                                          |
+| `scrollbar_grab_hovered` | Scrollbar handle on hover                                 |
+| `scrollbar_grab_active`  | Scrollbar handle when dragging                            |
+| `separator`              | Separator line                                            |
+| `separator_hovered`      | Separator on hover                                        |
+| `separator_active`       | Separator when clicked                                    |
+| `slider_grab`            | Slider knob                                               |
+| `slider_grab_active`     | Slider knob when active                                   |
+| `tab`                    | Tab background (inactive)                                 |
+| `tab_hovered`            | Tab on hover                                              |
+| `tab_active`             | Active tab                                                |
+| `tab_selected`           | Selected tab                                              |
+| `tab_unfocused`          | Unfocused tab                                             |
+| `tab_unfocused_active`   | Active tab when unfocused                                 |
+| `table_border_light`     | Light border of tables                                    |
+| `table_border_strong`    | Strong table border (usually outer edge)                  |
+| `table_header_bg`        | Background of table headers                               |
+| `table_row_bg`           | Background for table rows                                 |
+| `table_row_bg_alt`       | Alternate row background (striped tables)                 |
+| `text`                   | Default text color                                        |
+| `text_disabled`          | Disabled/grayed-out text                                  |
+| `text_link`              | Clickable link-style text                                 |
+| `text_selected_bg`       | Background of selected text                               |
+| `title_bg`               | Title bar background                                      |
+| `title_bg_active`        | Title bar when window is active                           |
+| `title_bg_collapsed`     | Title bar when window is collapsed                        |
+| `drag_drop_target`       | Highlight when dragging over drop targets                 |
+| `nav_highlight`          | Highlighted item under keyboard/gamepad navigation focus  |
 
-```
-window_bg, child_bg, border, border_shadow, button, button_active,
-button_hovered, check_mark, frame_bg, frame_bg_active, frame_bg_hovered,
-header, header_active, header_hovered, menu_bar_bg, modal_window_dim_bg,
-popup_bg, resize_grip, resize_grip_active, resize_grip_hovered,
-scrollbar_bg, scrollbar_grab, scrollbar_grab_active, scrollbar_grab_hovered,
-separator, separator_active, separator_hovered, slider_grab, slider_grab_active,
-tab, tab_hovered, tab_active, tab_selected, tab_unfocused, tab_unfocused_active,
-table_border_light, table_border_strong, table_header_bg, table_row_bg, table_row_bg_alt,
-text, text_disabled, text_link, text_selected_bg, title_bg, title_bg_active,
-title_bg_collapsed, drag_drop_target, nav_highlight
-```
 
 ---
 
