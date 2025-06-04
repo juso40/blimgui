@@ -1,7 +1,7 @@
-from imgui_bundle import hello_imgui, immapp  # type: ignore
-from unrealsdk import logging  # type: ignore
-from mods_base import Game  # type: ignore
-from unrealsdk.hooks import Type, add_hook  # type: ignore
+from imgui_bundle import hello_imgui, immapp
+from unrealsdk import logging
+from mods_base import Game
+from unrealsdk.hooks import Type, add_hook
 
 from .backend import DrawCallback, RenderBackend
 
@@ -35,8 +35,10 @@ class HookBasedBackend(RenderBackend):
         if self.is_window_open():
             print("Window already open!")
             return
+        
         self._should_close = False
         self._draw_callback = callback or self._draw_callback or self._fallback_drawcall
+        self._theme_applied = False
 
         immapp.manual_render.setup_from_runner_params(
             runner_params=immapp.RunnerParams(
@@ -54,18 +56,17 @@ class HookBasedBackend(RenderBackend):
             ),
             add_ons_params=immapp.AddOnsParams(with_implot=True, with_markdown=True, with_node_editor=True),
         )
+        self.apply_theme()
 
-    def render(self, *_) -> None:  # noqa: ANN002
+    def render(self, *_) -> None: 
         if not hello_imgui.is_using_hello_imgui():
             return
-        
-        self.apply_theme()
-        
         try:
             immapp.manual_render.render()
-        except Exception as e:  # noqa: BLE001
+        except Exception as e: 
             logging.error(f"Error during rendering: {e}")
             self.close_window()
         if self._should_close:
-            hello_imgui.get_runner_params().app_shall_exit = True
+            if hello_imgui.get_runner_params():
+                hello_imgui.get_runner_params().app_shall_exit = True
             immapp.manual_render.tear_down()

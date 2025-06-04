@@ -1,7 +1,0 @@
-text: 1.0 1.0 1.0 1.0
-window_bg: 0.0 0.0 0.1 1.0
-button: 0.0 0.0 0.8 1.0
-button_hovered: 0.0 0.0 1.0 1.0
-button_active: 0.2 0.2 0.9 1.0
-title_bg: 0.0 0.0 0.5 1.0
-title_bg_active: 0.0 0.0 0.7 1.0

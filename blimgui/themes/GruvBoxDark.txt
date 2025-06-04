@@ -1,0 +1,64 @@
+
+alpha: 0.98
+window_padding: 7.0 6.0
+window_border_size: 1.0
+child_rounding: 2.0
+child_border_size: 1.0
+popup_rounding: 2.0
+popup_border_size: 1.0
+frame_padding: 5.0 4.0
+frame_rounding: 2.0
+frame_border_size: 0.0
+item_spacing: 7.0 5.0
+item_inner_spacing: 5.0 5.0
+indent_spacing: 20.0
+scrollbar_size: 12.0
+scrollbar_rounding: 2.0
+grab_min_size: 10.0
+grab_rounding: 2.0
+tab_rounding: 2.0
+button_text_align: 0.5 0.5
+
+window_bg: 0.157 0.157 0.157 0.98
+child_bg: 0.235 0.220 0.212 1.00
+popup_bg: 0.235 0.220 0.212 0.97
+text: 0.922 0.859 0.698 1.00
+text_disabled: 0.659 0.600 0.518 0.70
+text_selected_bg: 0.557 0.753 0.486 0.35
+border: 0.573 0.514 0.455 0.60
+border_shadow: 0.00 0.00 0.00 0.00
+frame_bg: 0.314 0.286 0.271 1.00
+frame_bg_hovered: 0.659 0.600 0.518 0.40
+frame_bg_active: 0.980 0.741 0.184 0.70
+title_bg: 0.196 0.188 0.184 1.00
+title_bg_active: 0.984 0.286 0.204 1.00
+title_bg_collapsed: 0.157 0.157 0.157 1.00
+menu_bar_bg: 0.196 0.188 0.184 1.00
+scrollbar_bg: 0.235 0.220 0.212 1.00
+scrollbar_grab: 0.314 0.286 0.271 0.80
+scrollbar_grab_active: 0.447 0.408 0.384 1.00
+check_mark: 0.722 0.733 0.149 1.00
+slider_grab: 0.557 0.753 0.486 0.80
+button: 0.514 0.647 0.596 0.70
+button_hovered: 0.514 0.647 0.596 0.90
+button_active: 0.827 0.525 0.608 1.00
+header: 0.514 0.647 0.596 0.75
+header_hovered: 0.514 0.647 0.596 0.95
+header_active: 0.827 0.525 0.608 1.00
+separator: 0.486 0.435 0.392 0.70
+separator_hovered: 0.486 0.435 0.392 0.90
+separator_active: 0.514 0.647 0.596 1.00
+resize_grip: 0.314 0.286 0.271 0.50
+resize_grip_hovered: 0.447 0.408 0.384 0.70
+resize_grip_active: 0.447 0.408 0.384 1.00
+tab: 0.235 0.220 0.212 1.00
+tab_hovered: 0.447 0.408 0.384 0.80
+tab_active: 0.314 0.286 0.271 1.00
+tab_selected: 0.314 0.286 0.271 1.00
+tab_unfocused: 0.196 0.188 0.184 0.97
+tab_unfocused_active: 0.235 0.220 0.212 1.00
+plot_lines: 0.557 0.753 0.486 0.80
+plot_lines_hovered: 0.694 0.831 0.306 1.00
+drag_drop_target: 0.980 0.741 0.184 0.90
+nav_highlight: 0.996 0.502 0.098 0.70
+modal_window_dim_bg: 0.120 0.120 0.120 0.60

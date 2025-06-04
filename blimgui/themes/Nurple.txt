@@ -1,0 +1,66 @@
+
+alpha: 0.98
+window_padding: 7.0 7.0
+window_rounding: 4.0
+window_border_size: 1.0
+child_rounding: 4.0
+child_border_size: 1.0
+popup_rounding: 3.0
+popup_border_size: 1.0
+frame_padding: 5.0 4.0
+frame_rounding: 3.0
+frame_border_size: 0.0
+item_spacing: 8.0 5.0
+item_inner_spacing: 5.0 5.0
+indent_spacing: 21.0
+scrollbar_size: 14.0
+scrollbar_rounding: 3.0
+grab_min_size: 10.0
+grab_rounding: 3.0
+tab_rounding: 3.0
+button_text_align: 0.5 0.5
+
+window_bg: 0.157 0.165 0.212 0.98
+child_bg: 0.267 0.278 0.353 1.00
+popup_bg: 0.200 0.212 0.278 0.97
+text: 0.973 0.973 0.949 1.00
+text_disabled: 0.384 0.447 0.643 0.70
+text_selected_bg: 0.988 0.475 0.776 0.35
+border: 0.267 0.278 0.353 0.70
+border_shadow: 0.00 0.00 0.00 0.00
+frame_bg: 0.267 0.278 0.353 1.00
+frame_bg_hovered: 0.300 0.310 0.390 1.00
+frame_bg_active: 0.741 0.576 0.976 0.70
+title_bg: 0.157 0.165 0.212 1.00
+title_bg_active: 0.988 0.475 0.776 1.00
+title_bg_collapsed: 0.157 0.165 0.212 0.85
+menu_bar_bg: 0.200 0.212 0.278 1.00
+scrollbar_bg: 0.177 0.185 0.232 1.00
+scrollbar_grab: 0.384 0.447 0.643 0.80
+scrollbar_grab_hovered: 0.384 0.447 0.643 0.95
+scrollbar_grab_active: 0.384 0.447 0.643 1.00
+check_mark: 0.314 0.980 0.482 1.00
+slider_grab: 0.545 0.914 0.992 0.80
+slider_grab_active: 0.545 0.914 0.992 1.00
+button: 0.741 0.576 0.976 0.60
+button_hovered: 0.741 0.576 0.976 0.80
+button_active: 0.988 0.475 0.776 1.00
+header: 0.741 0.576 0.976 0.70
+header_hovered: 0.741 0.576 0.976 0.90
+header_active: 0.988 0.475 0.776 1.00
+separator: 0.384 0.447 0.643 0.50
+separator_hovered: 0.384 0.447 0.643 0.70
+separator_active: 0.545 0.914 0.992 1.00
+resize_grip: 0.267 0.278 0.353 0.50
+resize_grip_hovered: 0.545 0.914 0.992 0.70
+resize_grip_active: 0.545 0.914 0.992 1.00
+tab: 0.267 0.278 0.353 1.00
+tab_hovered: 0.741 0.576 0.976 0.80
+tab_active: 0.741 0.576 0.976 1.00
+tab_selected: 0.741 0.576 0.976 1.00
+tab_unfocused: 0.157 0.165 0.212 0.97
+tab_unfocused_active: 0.267 0.278 0.353 1.00
+plot_lines: 0.545 0.914 0.992 0.80
+drag_drop_target: 0.945 0.980 0.549 0.90
+nav_highlight: 1.000 0.722 0.424 0.70
+modal_window_dim_bg: 0.120 0.128 0.170 0.60

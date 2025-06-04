@@ -1,0 +1,47 @@
+
+alpha: 1.0
+frame_rounding: 3.0
+
+text: 0.00 0.00 0.00 1.00
+text_disabled: 0.60 0.60 0.60 1.00
+window_bg: 0.94 0.94 0.94 0.94
+child_bg: 0.00 0.00 0.00 0.00
+popup_bg: 1.00 1.00 1.00 0.94
+border: 0.00 0.00 0.00 0.39
+border_shadow: 1.00 1.00 1.00 0.10
+frame_bg: 1.00 1.00 1.00 0.94
+frame_bg_hovered: 0.26 0.59 0.98 0.40
+frame_bg_active: 0.26 0.59 0.98 0.67
+title_bg: 0.96 0.96 0.96 1.00
+title_bg_collapsed: 1.00 1.00 1.00 0.51
+title_bg_active: 0.82 0.82 0.82 1.00
+menu_bar_bg: 0.86 0.86 0.86 1.00
+scrollbar_bg: 0.98 0.98 0.98 0.53
+scrollbar_grab: 0.69 0.69 0.69 1.00
+scrollbar_grab_hovered: 0.59 0.59 0.59 1.00
+scrollbar_grab_active: 0.49 0.49 0.49 1.00
+combo_bg: 0.86 0.86 0.86 0.99
+check_mark: 0.26 0.59 0.98 1.00
+slider_grab: 0.24 0.52 0.88 1.00
+slider_grab_active: 0.26 0.59 0.98 1.00
+button: 0.26 0.59 0.98 0.40
+button_hovered: 0.26 0.59 0.98 1.00
+button_active: 0.06 0.53 0.98 1.00
+header: 0.26 0.59 0.98 0.31
+header_hovered: 0.26 0.59 0.98 0.80
+header_active: 0.26 0.59 0.98 1.00
+column: 0.39 0.39 0.39 1.00
+column_hovered: 0.26 0.59 0.98 0.78
+column_active: 0.26 0.59 0.98 1.00
+resize_grip: 1.00 1.00 1.00 0.50
+resize_grip_hovered: 0.26 0.59 0.98 0.67
+resize_grip_active: 0.26 0.59 0.98 0.95
+close_button: 0.59 0.59 0.59 0.50
+close_button_hovered: 0.98 0.39 0.36 1.00
+close_button_active: 0.98 0.39 0.36 1.00
+plot_lines: 0.39 0.39 0.39 1.00
+plot_lines_hovered: 1.00 0.43 0.35 1.00
+plot_histogram: 0.90 0.70 0.00 1.00
+plot_histogram_hovered: 1.00 0.60 0.00 1.00
+text_selected_bg: 0.26 0.59 0.98 0.35
+modal_window_dim_bg: 0.20 0.20 0.20 0.35
