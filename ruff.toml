@@ -31,6 +31,7 @@ ignore = [
     "PLR2004",
     "N999",
     "ANN401",
+    "UP038",
 
     # handled by black
     "E1",
@@ -39,4 +40,3 @@ ignore = [
     "W2",
     "W5",
 ]
-

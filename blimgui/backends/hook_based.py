@@ -1,23 +1,24 @@
-from imgui_bundle import hello_imgui, immapp
-from unrealsdk import logging
+from imgui_bundle import (
+    hello_imgui,  # type: ignore
+    immapp,
+)
 from mods_base import Game
+from unrealsdk import logging
 from unrealsdk.hooks import Type, add_hook
 
 from .backend import DrawCallback, RenderBackend
 
+HOOK_ADDRESSES = {
+    Game.Willow1: "Engine.GameViewportClient:Tick",
+    Game.Willow2: "WillowGame.WillowGameViewportClient:Tick",
+}
+
+
 class HookBasedBackend(RenderBackend):
     def initialize(self) -> None:
-        HOOK_ADDRESSES = {
-            "BL1": "Engine.GameViewportClient:Tick",
-            "Willow2": "WillowGame.WillowGameViewportClient:Tick"
-        }
-        
-        game_tree = Game.get_tree().name
-        hook_addr = HOOK_ADDRESSES.get(game_tree)
-        
-        if not hook_addr:
-            raise RuntimeError(f"Unsupported game: {game_tree}")
-        
+        if (hook_addr := HOOK_ADDRESSES.get(Game.get_tree())) is None:
+            raise RuntimeError(f"Unsupported game: {Game.get_tree()}")
+
         add_hook(
             hook_addr,
             Type.POST_UNCONDITIONAL,
@@ -35,7 +36,7 @@ class HookBasedBackend(RenderBackend):
         if self.is_window_open():
             print("Window already open!")
             return
-        
+
         self._should_close = False
         self._draw_callback = callback or self._draw_callback or self._fallback_drawcall
         self._theme_applied = False
@@ -58,12 +59,12 @@ class HookBasedBackend(RenderBackend):
         )
         self.apply_theme()
 
-    def render(self, *_) -> None: 
+    def render(self, *_) -> None:  # noqa: ANN002
         if not hello_imgui.is_using_hello_imgui():
             return
         try:
             immapp.manual_render.render()
-        except Exception as e: 
+        except Exception as e:  # noqa: BLE001
             logging.error(f"Error during rendering: {e}")
             self.close_window()
         if self._should_close:

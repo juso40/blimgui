@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from typing import Any
 
-from imgui_bundle import hello_imgui, imgui
+from imgui_bundle import (
+    hello_imgui,  # type: ignore
+    imgui,
+)
 from imgui_bundle import icons_fontawesome_4 as icons
 
 type DrawCallback = Callable[[], None]
@@ -45,7 +47,8 @@ class RenderBackend(ABC):
         if self._theme_applied:
             return
         from blimgui import style_ui
-        style_ui() 
+
+        style_ui()
 
         self._theme_applied = True
 

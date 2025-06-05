@@ -1,6 +1,9 @@
 import threading
 
-from imgui_bundle import hello_imgui, immapp
+from imgui_bundle import (
+    hello_imgui,  # type: ignore
+    immapp,
+)
 from unrealsdk import logging
 
 from .backend import DrawCallback, RenderBackend
@@ -27,7 +30,7 @@ class ThreadBasedBackend(RenderBackend):
             params = immapp.RunnerParams(
                 fps_idling=hello_imgui.FpsIdling(fps_idle=0.0, enable_idling=False),
                 callbacks=hello_imgui.RunnerCallbacks(
-                    show_gui=self.render, 
+                    show_gui=self.render,
                 ),
                 app_window_params=hello_imgui.AppWindowParams(
                     window_title=title,
@@ -38,20 +41,19 @@ class ThreadBasedBackend(RenderBackend):
                 ),
             )
             add_ons_params = immapp.AddOnsParams(with_implot=True, with_markdown=True, with_node_editor=True)
-            
+
             immapp.run(params, add_ons_params=add_ons_params)
 
             with self._lock:
-                self._should_close = True 
+                self._should_close = True
                 self._runner_thread = None
 
-
         with self._lock:
-            if self.is_window_open(): 
+            if self.is_window_open():
                 self.close_window()
 
             self._runner_thread = threading.Thread(
-                target=_threaded_window,  
+                target=_threaded_window,
                 daemon=True,
             )
             self._runner_thread.start()
@@ -59,41 +61,39 @@ class ThreadBasedBackend(RenderBackend):
     def close_window(self) -> None:
         with self._lock:
             if not self._runner_thread or not self._runner_thread.is_alive():
-                if self.is_window_open(): 
-                     if hello_imgui.get_runner_params():
-                         hello_imgui.get_runner_params().app_shall_exit = True
+                if self.is_window_open() and (params := hello_imgui.get_runner_params()):
+                    params.app_shall_exit = True
                 super().close_window()
-                return None
+                return
 
             if hello_imgui.get_runner_params():
-                 hello_imgui.get_runner_params().app_shall_exit = True
-            
+                hello_imgui.get_runner_params().app_shall_exit = True
+
             self._runner_thread.join(timeout=1)
             if self._runner_thread.is_alive():
                 logging.warning("blimgui: Runner thread did not exit in time after join.")
             self._runner_thread = None
 
-        super().close_window() 
-        return None
-
+        super().close_window()
+        return
 
     def initialize(self) -> None:
         pass
 
-    def render(self, *_) -> None: 
+    def render(self, *_) -> None:  # noqa: ANN002
         with self._lock:
             self.apply_theme()
-            
-            if self._should_close: 
-                if hello_imgui.get_runner_params():
-                    hello_imgui.get_runner_params().app_shall_exit = True
+
+            if self._should_close:
+                if params := hello_imgui.get_runner_params():
+                    params.app_shall_exit = True
                 return
 
             if self._draw_callback:
                 try:
                     self._draw_callback()
-                except Exception as e: 
+                except Exception as e:  # noqa: BLE001
                     logging.error(f"Error in draw callback: {e}")
-                    self._should_close = True 
+                    self._should_close = True
                     if hello_imgui.get_runner_params():
                         hello_imgui.get_runner_params().app_shall_exit = True
