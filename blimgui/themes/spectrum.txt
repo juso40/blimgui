@@ -1,0 +1,46 @@
+
+grab_rounding: 4.0
+
+text: 0.196 0.196 0.196 1.0 
+text_disabled: 0.557 0.557 0.557 1.0
+window_bg: 0.918 0.918 0.918 1.0
+child_bg: 0.00 0.00 0.00 0.00
+popup_bg: 1.0 1.0 1.0 1.0
+border: 0.733 0.733 0.733 1.0
+border_shadow: 0.0 0.0 0.0 0.0
+frame_bg: 0.961 0.961 0.961 1.0
+frame_bg_hovered: 1.0 1.0 1.0 1.0
+frame_bg_active: 0.827 0.827 0.827 1.0
+title_bg: 0.733 0.733 0.733 1.0
+title_bg_active: 0.827 0.827 0.827 1.0
+title_bg_collapsed: 0.627 0.627 0.627 1.0
+menu_bar_bg: 0.918 0.918 0.918 1.0
+scrollbar_bg: 0.918 0.918 0.918 1.0
+scrollbar_grab: 0.627 0.627 0.627 1.0
+scrollbar_grab_hovered: 0.439 0.439 0.439 1.0
+scrollbar_grab_active: 0.314 0.314 0.314 1.0
+check_mark: 0.149 0.502 0.922 1.0
+slider_grab: 0.314 0.314 0.314 1.0
+slider_grab_active: 0.196 0.196 0.196 1.0
+button: 0.961 0.961 0.961 1.0
+button_hovered: 1.0 1.0 1.0 1.0
+button_active: 0.827 0.827 0.827 1.0
+header: 0.216 0.557 0.941 1.0
+header_hovered: 0.149 0.502 0.922 1.0
+header_active: 0.078 0.451 0.902 1.0
+separator: 0.627 0.627 0.627 1.0
+separator_hovered: 0.439 0.439 0.439 1.0
+separator_active: 0.314 0.314 0.314 1.0
+resize_grip: 0.627 0.627 0.627 1.0
+resize_grip_hovered: 0.439 0.439 0.439 1.0
+resize_grip_active: 0.314 0.314 0.314 1.0
+plot_lines: 0.216 0.557 0.941 1.0
+plot_lines_hovered: 0.078 0.451 0.902 1.0
+plot_histogram: 0.216 0.557 0.941 1.0
+plot_histogram_hovered: 0.078 0.451 0.902 1.0
+text_selected_bg: 0.216 0.557 0.941 0.200
+drag_drop_target: 1.00 1.00 0.00 0.90
+nav_highlight: 0.125 0.125 0.125 0.039
+nav_windowing_highlight: 1.00 1.00 1.00 0.70
+nav_windowing_dim_bg: 0.80 0.80 0.80 0.20
+modal_window_dim_bg: 0.20 0.20 0.20 0.35

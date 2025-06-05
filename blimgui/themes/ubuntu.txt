@@ -1,0 +1,69 @@
+
+alpha: 1.0
+window_padding: 8.0 8.0
+window_rounding: 6.0
+window_border_size: 1.0
+child_rounding: 4.0
+child_border_size: 1.0
+popup_rounding: 4.0
+popup_border_size: 1.0
+frame_padding: 5.0 4.0
+frame_rounding: 4.0
+frame_border_size: 0.0
+item_spacing: 8.0 5.0
+item_inner_spacing: 5.0 5.0
+indent_spacing: 21.0
+scrollbar_size: 14.0
+scrollbar_rounding: 7.0
+grab_min_size: 10.0
+grab_rounding: 4.0
+tab_rounding: 4.0
+button_text_align: 0.5 0.5
+
+window_bg: 0.188 0.157 0.153 0.98
+child_bg: 0.198 0.167 0.163 0.98
+popup_bg: 0.168 0.137 0.133 0.96
+text: 0.90 0.90 0.90 1.00
+text_disabled: 0.50 0.50 0.50 1.00
+text_selected_bg: 0.925 0.302 0.075 0.40
+border: 0.30 0.28 0.27 0.80
+border_shadow: 0.00 0.00 0.00 0.00
+frame_bg: 0.158 0.127 0.123 1.00
+frame_bg_hovered: 0.228 0.197 0.193 1.00
+frame_bg_active: 0.248 0.217 0.213 1.00
+title_bg: 0.188 0.157 0.153 1.00
+title_bg_active: 0.925 0.302 0.075 1.00
+title_bg_collapsed: 0.188 0.157 0.153 1.00
+menu_bar_bg: 0.178 0.147 0.143 0.95
+scrollbar_bg: 0.158 0.127 0.123 1.00
+scrollbar_grab: 0.40 0.40 0.40 1.00
+scrollbar_grab_hovered: 0.50 0.50 0.50 1.00
+scrollbar_grab_active: 0.925 0.302 0.075 1.00
+check_mark: 0.925 0.302 0.075 1.00
+slider_grab: 0.60 0.58 0.57 1.00
+slider_grab_active: 0.925 0.302 0.075 1.00
+button: 0.925 0.302 0.075 1.00
+button_hovered: 0.950 0.400 0.150 1.00
+button_active: 0.850 0.250 0.050 1.00
+header: 0.248 0.217 0.213 1.00
+header_hovered: 0.300 0.270 0.260 1.00
+header_active: 0.925 0.302 0.075 1.00
+separator: 0.30 0.28 0.27 0.80
+separator_hovered: 0.40 0.38 0.37 1.00
+separator_active: 0.925 0.302 0.075 1.00
+resize_grip: 0.248 0.217 0.213 0.80
+resize_grip_hovered: 0.300 0.270 0.260 0.90
+resize_grip_active: 0.925 0.302 0.075 0.95
+tab: 0.188 0.157 0.153 1.00
+tab_hovered: 0.300 0.270 0.260 1.00
+tab_active: 0.248 0.217 0.213 1.00
+tab_selected: 0.248 0.217 0.213 1.00
+tab_unfocused: 0.158 0.127 0.123 0.97
+tab_unfocused_active: 0.188 0.157 0.153 1.00
+plot_lines: 0.90 0.90 0.90 0.63
+plot_lines_hovered: 0.925 0.302 0.075 1.00
+plot_histogram: 0.90 0.90 0.90 0.63
+plot_histogram_hovered: 0.925 0.302 0.075 1.00
+drag_drop_target: 0.925 0.302 0.075 0.90
+nav_highlight: 0.925 0.302 0.075 1.00
+modal_window_dim_bg: 0.15 0.12 0.12 0.75
