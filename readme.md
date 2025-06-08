@@ -2,7 +2,7 @@
 A [pyunrealsdk](https://github.com/bl-sdk/pyunrealsdk) mod library to easily add Dear ImGui windows in any Borderlands game.
 
 ## 🚀 Installation
-Download the latest `blimgui.zip` from the [Releases page](https://github.com/yourusername/blimgui/releases) (replace with your actual link).
+Download the latest `blimgui.zip` from the [Releases page](blimgui.zip).
 Unpack the `blimgui` folder into your game’s `sdk_mods` directory.
 
 Example path: `Borderlands 2/Binaries/Win32/sdk_mods/blimgui/`
@@ -15,7 +15,7 @@ Example path: `Borderlands 2/Binaries/Win32/sdk_mods/blimgui/`
 ### 📁 Adding & Using Themes
 
 1.  **Get Theme Files (`.txt`):**
-    * Browse and download community-made themes from the [`themes`](./themes) folder at the root of this GitHub repository.
+    * Browse and download community-made themes from the [`themes`](./blimgui/themes) folder at the root of this GitHub repository.
     * Or, craft your unique theme by following the guide below!
 
 2.  **Place Your Themes:**

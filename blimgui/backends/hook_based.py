@@ -8,10 +8,16 @@ from unrealsdk.hooks import Type, add_hook
 
 from .backend import DrawCallback, RenderBackend
 
-HOOK_ADDRESSES = {
-    Game.Willow1: "Engine.GameViewportClient:Tick",
-    Game.Willow2: "WillowGame.WillowGameViewportClient:Tick",
-}
+try:
+    HOOK_ADDRESSES = {
+        Game.Willow1: "Engine.GameViewportClient:Tick",
+        Game.Willow2: "WillowGame.WillowGameViewportClient:Tick",
+    }
+except AttributeError:
+    # Fallback while the SDK's nightly is not released
+    HOOK_ADDRESSES = {
+        Game.Willow2: "WillowGame.WillowGameViewportClient:Tick",
+    }
 
 
 class HookBasedBackend(RenderBackend):
