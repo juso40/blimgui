@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from typing import List
-import subprocess
-import sys
 import os
 
 from imgui_bundle import imgui, imgui_md, immapp, hello_imgui, ImVec2
+from imgui_bundle.demos_python import demo_utils
 from typing import Callable
 
 
@@ -115,10 +114,10 @@ class DemoAppTable:
 
         def fn_table_gui():
             table_flags = (
-                imgui.TableFlags_.row_bg.value
-                | imgui.TableFlags_.borders.value
-                | imgui.TableFlags_.resizable.value
-                | imgui.TableFlags_.sizing_stretch_same.value
+                imgui.TableFlags_.row_bg
+                | imgui.TableFlags_.borders
+                | imgui.TableFlags_.resizable
+                | imgui.TableFlags_.sizing_stretch_same
             )
             nb_columns = 3
             if imgui.begin_table("Apps", nb_columns, table_flags):
@@ -144,10 +143,9 @@ class DemoAppTable:
 
                         imgui.same_line()
 
-                        if imgui.button("Run"):
-                            subprocess.Popen(
-                                [sys.executable, self._demo_python_file_path(demo_app)]
-                            )
+                        if demo_utils.can_run_subprocess():
+                            if imgui.button("Run"):
+                                demo_utils.spawn_demo_file(self._demo_python_file_path(demo_app))
 
                     imgui.pop_id()
                 imgui.end_table()

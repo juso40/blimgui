@@ -5,7 +5,7 @@ from __future__ import annotations
 import dataclasses
 from typing import Any, Callable, Literal
 
-from pydantic_core import PydanticUndefined
+from pydantic_core._pydantic_core import PydanticUndefined
 
 from ._internal import _internal_dataclass
 

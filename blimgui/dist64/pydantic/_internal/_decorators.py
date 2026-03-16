@@ -2,6 +2,7 @@
 
 from __future__ import annotations as _annotations
 
+import sys
 import types
 from collections import deque
 from collections.abc import Iterable
@@ -11,7 +12,8 @@ from inspect import Parameter, Signature, isdatadescriptor, ismethoddescriptor, 
 from itertools import islice
 from typing import TYPE_CHECKING, Any, Callable, ClassVar, Generic, Literal, TypeVar, Union
 
-from pydantic_core import PydanticUndefined, PydanticUndefinedType, core_schema
+from pydantic_core import core_schema
+from pydantic_core._pydantic_core import PydanticUndefined, PydanticUndefinedType
 from typing_extensions import TypeAlias, is_typeddict
 
 from ..errors import PydanticUserError
@@ -24,6 +26,7 @@ from ._utils import can_be_positional
 if TYPE_CHECKING:
     from ..fields import ComputedFieldInfo
     from ..functional_validators import FieldValidatorModes
+    from ._config import ConfigWrapper
 
 
 @dataclass(**slots_true)
@@ -196,7 +199,7 @@ class PydanticDescriptorProxy(Generic[ReturnType]):
 
     def __get__(self, obj: object | None, obj_type: type[object] | None = None) -> PydanticDescriptorProxy[ReturnType]:
         try:
-            return self.wrapped.__get__(obj, obj_type)
+            return self.wrapped.__get__(obj, obj_type)  # pyright: ignore[reportReturnType]
         except AttributeError:
             # not a descriptor, e.g. a partial object
             return self.wrapped  # type: ignore[return-value]
@@ -514,8 +517,15 @@ class DecoratorInfos:
                 setattr(model_dc, name, value)
         return res
 
+    def update_from_config(self, config_wrapper: ConfigWrapper) -> None:
+        """Update the decorator infos from the configuration of the class they are attached to."""
+        for name, computed_field_dec in self.computed_fields.items():
+            computed_field_dec.info._update_from_config(config_wrapper, name)
 
-def inspect_validator(validator: Callable[..., Any], mode: FieldValidatorModes) -> bool:
+
+def inspect_validator(
+    validator: Callable[..., Any], *, mode: FieldValidatorModes, type: Literal['field', 'model']
+) -> bool:
     """Look at a field or model validator function and determine whether it takes an info argument.
 
     An error is raised if the function has an invalid signature.
@@ -523,12 +533,13 @@ def inspect_validator(validator: Callable[..., Any], mode: FieldValidatorModes) 
     Args:
         validator: The validator function to inspect.
         mode: The proposed validator mode.
+        type: The type of validator, either 'field' or 'model'.
 
     Returns:
         Whether the validator takes an info argument.
     """
     try:
-        sig = signature(validator)
+        sig = _signature_no_eval(validator)
     except (ValueError, TypeError):
         # `inspect.signature` might not be able to infer a signature, e.g. with C objects.
         # In this case, we assume no info argument is present:
@@ -547,7 +558,7 @@ def inspect_validator(validator: Callable[..., Any], mode: FieldValidatorModes) 
             return False
 
     raise PydanticUserError(
-        f'Unrecognized field_validator function signature for {validator} with `mode={mode}`:{sig}',
+        f'Unrecognized {type} validator function signature for {validator} with `mode={mode}`: {sig}',
         code='validator-signature',
     )
 
@@ -566,7 +577,7 @@ def inspect_field_serializer(serializer: Callable[..., Any], mode: Literal['plai
         Tuple of (is_field_serializer, info_arg).
     """
     try:
-        sig = signature(serializer)
+        sig = _signature_no_eval(serializer)
     except (ValueError, TypeError):
         # `inspect.signature` might not be able to infer a signature, e.g. with C objects.
         # In this case, we assume no info argument is present and this is not a method:
@@ -604,7 +615,7 @@ def inspect_annotated_serializer(serializer: Callable[..., Any], mode: Literal['
         info_arg
     """
     try:
-        sig = signature(serializer)
+        sig = _signature_no_eval(serializer)
     except (ValueError, TypeError):
         # `inspect.signature` might not be able to infer a signature, e.g. with C objects.
         # In this case, we assume no info argument is present:
@@ -636,7 +647,7 @@ def inspect_model_serializer(serializer: Callable[..., Any], mode: Literal['plai
             '`@model_serializer` must be applied to instance methods', code='model-serializer-instance-method'
         )
 
-    sig = signature(serializer)
+    sig = _signature_no_eval(serializer)
     info_arg = _serializer_info_arg(mode, count_positional_required_params(sig))
     if info_arg is None:
         raise PydanticUserError(
@@ -684,7 +695,7 @@ def is_instance_method_from_sig(function: AnyDecoratorCallable) -> bool:
     Returns:
         `True` if the function is an instance method, `False` otherwise.
     """
-    sig = signature(unwrap_wrapped_function(function))
+    sig = _signature_no_eval(unwrap_wrapped_function(function))
     first = next(iter(sig.parameters.values()), None)
     if first and first.name == 'self':
         return True
@@ -708,7 +719,7 @@ def ensure_classmethod_based_on_signature(function: AnyDecoratorCallable) -> Any
 
 
 def _is_classmethod_from_sig(function: AnyDecoratorCallable) -> bool:
-    sig = signature(unwrap_wrapped_function(function))
+    sig = _signature_no_eval(unwrap_wrapped_function(function))
     first = next(iter(sig.parameters.values()), None)
     if first and first.name == 'cls':
         return True
@@ -836,3 +847,13 @@ def ensure_property(f: Any) -> Any:
         return f
     else:
         return property(f)
+
+
+def _signature_no_eval(f: Callable[..., Any]) -> Signature:
+    """Get the signature of a callable without evaluating any annotations."""
+    if sys.version_info >= (3, 14):
+        from annotationlib import Format
+
+        return signature(f, annotation_format=Format.FORWARDREF)
+    else:
+        return signature(f)

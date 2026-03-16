@@ -16,9 +16,10 @@ from imgui_bundle.imgui import (
     ImVec4Like,
     ImU32,
     ImDrawList,
-    ImTextureID,
+    ImTextureRef,
 )
-ImageFlags = int # enum ImageFlags_
+
+ImageFlags = int  # enum ImageFlags_
 
 ImGui_Context = imgui.internal.Context
 
@@ -78,6 +79,7 @@ Location = int  # enum Location_
 ImPlane3D = int  # enum ImPlane3D_
 # typedef int ImPlot3DColormap; // -> ImPlot3DColormap_          // Enum: Colormaps
 #
+ImAxis3D = int  # enum ImAxis3D_
 
 """
 """
@@ -123,6 +125,13 @@ ImPlane3D = int  # enum ImPlane3D_
 # #ifndef IMGUI_DISABLE
 #
 
+# [ADAPT_IMGUI_BUNDLE]
+# #ifdef IMGUI_BUNDLE_PYTHON_API
+#
+# #endif
+#
+# [/ADAPT_IMGUI_BUNDLE]
+
 # -----------------------------------------------------------------------------
 # [SECTION] Macros and Defines
 # -----------------------------------------------------------------------------
@@ -136,7 +145,6 @@ ImPlane3D = int  # enum ImPlane3D_
 # Enums
 
 # Flags
-# -> ImPlot3DAxisFlags_     // Flags: Axis flags
 
 # Fallback for ImGui versions before v1.92: define ImTextureRef as ImTextureID
 # You can `#define IMPLOT3D_NO_IMTEXTUREREF` to avoid this fallback
@@ -145,7 +153,7 @@ ImPlane3D = int  # enum ImPlane3D_
 # [SECTION] Flags & Enumerations
 # -----------------------------------------------------------------------------
 
-class Flags_(enum.Enum):
+class Flags_(enum.IntFlag):
     """Flags for ImPlot3D::BeginPlot()"""
 
     # ImPlot3DFlags_None = 0,                 /* original C++ signature */
@@ -160,11 +168,21 @@ class Flags_(enum.Enum):
     no_clip = enum.auto()  # (= 1 << 3)  # Disable 3D box clipping
     # ImPlot3DFlags_NoMenus = 1 << 4,         /* original C++ signature */
     no_menus = enum.auto()  # (= 1 << 4)  # The user will not be able to open context menus
+    # ImPlot3DFlags_Equal = 1 << 5,           /* original C++ signature */
+    equal = enum.auto()  # (= 1 << 5)  # X, Y, and Z axes will be constrained to have the same units/pixel
+    # ImPlot3DFlags_NoRotate = 1 << 6,        /* original C++ signature */
+    no_rotate = enum.auto()  # (= 1 << 6)  # Lock rotation interaction
+    # ImPlot3DFlags_NoPan = 1 << 7,           /* original C++ signature */
+    no_pan = enum.auto()  # (= 1 << 7)  # Lock panning/translation interaction
+    # ImPlot3DFlags_NoZoom = 1 << 8,          /* original C++ signature */
+    no_zoom = enum.auto()  # (= 1 << 8)  # Lock zoom interaction
+    # ImPlot3DFlags_NoInputs = 1 << 9,        /* original C++ signature */
+    no_inputs = enum.auto()  # (= 1 << 9)  # Disable all user inputs
     # ImPlot3DFlags_CanvasOnly = ImPlot3DFlags_NoTitle | ImPlot3DFlags_NoLegend | ImPlot3DFlags_NoMouseText,    /* original C++ signature */
     # }
     canvas_only = enum.auto()  # (= Flags_NoTitle | Flags_NoLegend | Flags_NoMouseText)
 
-class Cond_(enum.Enum):
+class Cond_(enum.IntFlag):
     """Represents a condition for SetupAxisLimits etc. (same as ImGuiCond, but we only support a subset of those enums)"""
 
     # ImPlot3DCond_None = ImGuiCond_None,         /* original C++ signature */
@@ -174,7 +192,7 @@ class Cond_(enum.Enum):
     # ImPlot3DCond_Once = ImGuiCond_Once,         /* original C++ signature */
     once = enum.auto()  # (= Cond_Once)  # Set the variable once per runtime session (only the first call will succeed)
 
-class Col_(enum.Enum):
+class Col_(enum.IntFlag):
     # Item colors
     # ImPlot3DCol_Line = 0,          /* original C++ signature */
     line = enum.auto()  # (= 0)  # Line color
@@ -213,7 +231,7 @@ class Col_(enum.Enum):
     # }
     count = enum.auto()  # (= 15)
 
-class StyleVar_(enum.Enum):
+class StyleVar_(enum.IntFlag):
     """Plot styling variables"""
 
     # Item style
@@ -238,18 +256,22 @@ class StyleVar_(enum.Enum):
     )  # (= 7)  # ImVec2, padding between widget frame and plot area, labels, or outside legends (i.e. main padding)
     # ImPlot3DStyleVar_LabelPadding,        /* original C++ signature */
     label_padding = enum.auto()  # (= 8)  # ImVec2, padding between axes labels, tick labels, and plot edge
+    # ImPlot3DStyleVar_ViewScaleFactor,     /* original C++ signature */
+    view_scale_factor = (
+        enum.auto()
+    )  # (= 9)  # float, scale factor for 3D view, you can use it to make the whole plot larger or smaller
     # Legend style
     # ImPlot3DStyleVar_LegendPadding,          /* original C++ signature */
-    legend_padding = enum.auto()  # (= 9)  # ImVec2, legend padding from plot edges
+    legend_padding = enum.auto()  # (= 10)  # ImVec2, legend padding from plot edges
     # ImPlot3DStyleVar_LegendInnerPadding,     /* original C++ signature */
-    legend_inner_padding = enum.auto()  # (= 10)  # ImVec2, legend inner padding from legend edges
+    legend_inner_padding = enum.auto()  # (= 11)  # ImVec2, legend inner padding from legend edges
     # ImPlot3DStyleVar_LegendSpacing,          /* original C++ signature */
-    legend_spacing = enum.auto()  # (= 11)  # ImVec2, spacing between legend entries
+    legend_spacing = enum.auto()  # (= 12)  # ImVec2, spacing between legend entries
     # ImPlot3DStyleVar_COUNT    /* original C++ signature */
     # }
-    count = enum.auto()  # (= 12)
+    count = enum.auto()  # (= 13)
 
-class Marker_(enum.Enum):
+class Marker_(enum.IntFlag):
     # ImPlot3DMarker_None = -1,     /* original C++ signature */
     none = enum.auto()  # (= -1)  # No marker
     # ImPlot3DMarker_Circle,        /* original C++ signature */
@@ -276,7 +298,7 @@ class Marker_(enum.Enum):
     # }
     count = enum.auto()  # (= 10)
 
-class ItemFlags_(enum.Enum):
+class ItemFlags_(enum.IntFlag):
     """Flags for items"""
 
     # ImPlot3DItemFlags_None = 0,              /* original C++ signature */
@@ -286,7 +308,7 @@ class ItemFlags_(enum.Enum):
     # ImPlot3DItemFlags_NoFit = 1 << 1,        /* original C++ signature */
     no_fit = enum.auto()  # (= 1 << 1)  # The item won't be considered for plot fits
 
-class ScatterFlags_(enum.Enum):
+class ScatterFlags_(enum.IntFlag):
     """Flags for PlotScatter"""
 
     # ImPlot3DScatterFlags_None = 0,     /* original C++ signature */
@@ -297,7 +319,7 @@ class ScatterFlags_(enum.Enum):
     # }
     no_fit = enum.auto()  # (= ItemFlags_NoFit)
 
-class LineFlags_(enum.Enum):
+class LineFlags_(enum.IntFlag):
     """Flags for PlotLine"""
 
     # ImPlot3DLineFlags_None = 0,     /* original C++ signature */
@@ -313,7 +335,7 @@ class LineFlags_(enum.Enum):
     # ImPlot3DLineFlags_SkipNaN = 1 << 12,      /* original C++ signature */
     skip_nan = enum.auto()  # (= 1 << 12)  # NaNs values will be skipped instead of rendered as missing data
 
-class TriangleFlags_(enum.Enum):
+class TriangleFlags_(enum.IntFlag):
     """Flags for PlotTriangle"""
 
     # ImPlot3DTriangleFlags_None = 0,     /* original C++ signature */
@@ -321,10 +343,15 @@ class TriangleFlags_(enum.Enum):
     # ImPlot3DTriangleFlags_NoLegend = ImPlot3DItemFlags_NoLegend,    /* original C++ signature */
     no_legend = enum.auto()  # (= ItemFlags_NoLegend)
     # ImPlot3DTriangleFlags_NoFit = ImPlot3DItemFlags_NoFit,    /* original C++ signature */
-    # }
     no_fit = enum.auto()  # (= ItemFlags_NoFit)
+    # ImPlot3DTriangleFlags_NoLines = 1 << 10,       /* original C++ signature */
+    no_lines = enum.auto()  # (= 1 << 10)  # No lines will be rendered
+    # ImPlot3DTriangleFlags_NoFill = 1 << 11,        /* original C++ signature */
+    no_fill = enum.auto()  # (= 1 << 11)  # No fill will be rendered
+    # ImPlot3DTriangleFlags_NoMarkers = 1 << 12,     /* original C++ signature */
+    no_markers = enum.auto()  # (= 1 << 12)  # No markers will be rendered
 
-class QuadFlags_(enum.Enum):
+class QuadFlags_(enum.IntFlag):
     """Flags for PlotQuad"""
 
     # ImPlot3DQuadFlags_None = 0,     /* original C++ signature */
@@ -332,10 +359,15 @@ class QuadFlags_(enum.Enum):
     # ImPlot3DQuadFlags_NoLegend = ImPlot3DItemFlags_NoLegend,    /* original C++ signature */
     no_legend = enum.auto()  # (= ItemFlags_NoLegend)
     # ImPlot3DQuadFlags_NoFit = ImPlot3DItemFlags_NoFit,    /* original C++ signature */
-    # }
     no_fit = enum.auto()  # (= ItemFlags_NoFit)
+    # ImPlot3DQuadFlags_NoLines = 1 << 10,       /* original C++ signature */
+    no_lines = enum.auto()  # (= 1 << 10)  # No lines will be rendered
+    # ImPlot3DQuadFlags_NoFill = 1 << 11,        /* original C++ signature */
+    no_fill = enum.auto()  # (= 1 << 11)  # No fill will be rendered
+    # ImPlot3DQuadFlags_NoMarkers = 1 << 12,     /* original C++ signature */
+    no_markers = enum.auto()  # (= 1 << 12)  # No markers will be rendered
 
-class SurfaceFlags_(enum.Enum):
+class SurfaceFlags_(enum.IntFlag):
     """Flags for PlotSurface"""
 
     # ImPlot3DSurfaceFlags_None = 0,     /* original C++ signature */
@@ -343,10 +375,15 @@ class SurfaceFlags_(enum.Enum):
     # ImPlot3DSurfaceFlags_NoLegend = ImPlot3DItemFlags_NoLegend,    /* original C++ signature */
     no_legend = enum.auto()  # (= ItemFlags_NoLegend)
     # ImPlot3DSurfaceFlags_NoFit = ImPlot3DItemFlags_NoFit,    /* original C++ signature */
-    # }
     no_fit = enum.auto()  # (= ItemFlags_NoFit)
+    # ImPlot3DSurfaceFlags_NoLines = 1 << 10,       /* original C++ signature */
+    no_lines = enum.auto()  # (= 1 << 10)  # No lines will be rendered
+    # ImPlot3DSurfaceFlags_NoFill = 1 << 11,        /* original C++ signature */
+    no_fill = enum.auto()  # (= 1 << 11)  # No fill will be rendered
+    # ImPlot3DSurfaceFlags_NoMarkers = 1 << 12,     /* original C++ signature */
+    no_markers = enum.auto()  # (= 1 << 12)  # No markers will be rendered
 
-class MeshFlags_(enum.Enum):
+class MeshFlags_(enum.IntFlag):
     """Flags for PlotMesh"""
 
     # ImPlot3DMeshFlags_None = 0,     /* original C++ signature */
@@ -354,10 +391,15 @@ class MeshFlags_(enum.Enum):
     # ImPlot3DMeshFlags_NoLegend = ImPlot3DItemFlags_NoLegend,    /* original C++ signature */
     no_legend = enum.auto()  # (= ItemFlags_NoLegend)
     # ImPlot3DMeshFlags_NoFit = ImPlot3DItemFlags_NoFit,    /* original C++ signature */
-    # }
     no_fit = enum.auto()  # (= ItemFlags_NoFit)
+    # ImPlot3DMeshFlags_NoLines = 1 << 10,       /* original C++ signature */
+    no_lines = enum.auto()  # (= 1 << 10)  # No lines will be rendered
+    # ImPlot3DMeshFlags_NoFill = 1 << 11,        /* original C++ signature */
+    no_fill = enum.auto()  # (= 1 << 11)  # No fill will be rendered
+    # ImPlot3DMeshFlags_NoMarkers = 1 << 12,     /* original C++ signature */
+    no_markers = enum.auto()  # (= 1 << 12)  # No markers will be rendered
 
-class ImageFlags_(enum.Enum):
+class ImageFlags_(enum.IntFlag):
     """Flags for PlotImage"""
 
     # ImPlot3DImageFlags_None = 0,     /* original C++ signature */
@@ -368,7 +410,7 @@ class ImageFlags_(enum.Enum):
     # }
     no_fit = enum.auto()  # (= ItemFlags_NoFit)
 
-class LegendFlags_(enum.Enum):
+class LegendFlags_(enum.IntFlag):
     """Flags for legends"""
 
     # ImPlot3DLegendFlags_None = 0,                     /* original C++ signature */
@@ -382,7 +424,7 @@ class LegendFlags_(enum.Enum):
     # ImPlot3DLegendFlags_Horizontal = 1 << 2,          /* original C++ signature */
     horizontal = enum.auto()  # (= 1 << 2)  # Legend entries will be displayed horizontally
 
-class Location_(enum.Enum):
+class Location_(enum.IntFlag):
     """Used to position legend on a plot"""
 
     # ImPlot3DLocation_Center = 0,                                                     /* original C++ signature */
@@ -404,7 +446,7 @@ class Location_(enum.Enum):
     # ImPlot3DLocation_SouthEast = ImPlot3DLocation_South | ImPlot3DLocation_East      /* original C++ signature */
     south_east = enum.auto()  # (= Location_South | Location_East)  # Bottom-right
 
-class AxisFlags_(enum.Enum):
+class AxisFlags_(enum.IntFlag):
     """Flags for axis"""
 
     # ImPlot3DAxisFlags_None = 0,                  /* original C++ signature */
@@ -425,13 +467,17 @@ class AxisFlags_(enum.Enum):
     auto_fit = enum.auto()  # (= 1 << 6)  # Axis will be auto-fitting to data extents
     # ImPlot3DAxisFlags_Invert = 1 << 7,           /* original C++ signature */
     invert = enum.auto()  # (= 1 << 7)  # The axis will be inverted
+    # ImPlot3DAxisFlags_PanStretch = 1 << 8,       /* original C++ signature */
+    pan_stretch = (
+        enum.auto()
+    )  # (= 1 << 8)  # Panning in a locked or constrained state will cause the axis to stretch if possible
     # ImPlot3DAxisFlags_Lock = ImPlot3DAxisFlags_LockMin | ImPlot3DAxisFlags_LockMax,    /* original C++ signature */
     lock = enum.auto()  # (= AxisFlags_LockMin | AxisFlags_LockMax)
     # ImPlot3DAxisFlags_NoDecorations = ImPlot3DAxisFlags_NoLabel | ImPlot3DAxisFlags_NoGridLines | ImPlot3DAxisFlags_NoTickLabels,    /* original C++ signature */
     # }
     no_decorations = enum.auto()  # (= AxisFlags_NoLabel | AxisFlags_NoGridLines | AxisFlags_NoTickLabels)
 
-class ImAxis3D_(enum.Enum):
+class ImAxis3D_(enum.IntFlag):
     """Axis indices"""
 
     # ImAxis3D_X = 0,    /* original C++ signature */
@@ -444,7 +490,7 @@ class ImAxis3D_(enum.Enum):
     # }
     count = enum.auto()  # (= 3)
 
-class ImPlane3D_(enum.Enum):
+class ImPlane3D_(enum.IntFlag):
     """Plane indices"""
 
     # ImPlane3D_YZ = 0,    /* original C++ signature */
@@ -457,7 +503,7 @@ class ImPlane3D_(enum.Enum):
     # }
     count = enum.auto()  # (= 3)
 
-class Colormap_(enum.Enum):
+class Colormap_(enum.IntFlag):
     """Colormaps"""
 
     # ImPlot3DColormap_Deep = 0,          /* original C++ signature */
@@ -587,6 +633,16 @@ def setup_axis_limits(axis: ImAxis3D, v_min: float, v_max: float, cond: Optional
     """
     pass
 
+# IMPLOT3D_API void SetupAxisLimitsConstraints(ImAxis3D axis, double v_min, double v_max);    /* original C++ signature */
+def setup_axis_limits_constraints(axis: ImAxis3D, v_min: float, v_max: float) -> None:
+    """Sets an axis' limits constraints"""
+    pass
+
+# IMPLOT3D_API void SetupAxisZoomConstraints(ImAxis3D axis, double z_min, double z_max);    /* original C++ signature */
+def setup_axis_zoom_constraints(axis: ImAxis3D, z_min: float, z_max: float) -> None:
+    """Sets an axis' zoom constraints"""
+    pass
+
 # IMPLOT3D_API void SetupAxes(const char* x_label, const char* y_label, const char* z_label, ImPlot3DAxisFlags x_flags = 0,    /* original C++ signature */
 #                             ImPlot3DAxisFlags y_flags = 0, ImPlot3DAxisFlags z_flags = 0);
 def setup_axes(
@@ -608,7 +664,7 @@ def setup_axes_limits(
     """
     pass
 
-# IMPLOT3D_API void SetupBoxRotation(float elevation, float azimuth, bool animate = false, ImPlot3DCond cond = ImPlot3DCond_Once);    /* original C++ signature */
+# IMPLOT3D_API void SetupBoxRotation(double elevation, double azimuth, bool animate = false, ImPlot3DCond cond = ImPlot3DCond_Once);    /* original C++ signature */
 @overload
 def setup_box_rotation(elevation: float, azimuth: float, animate: bool = False, cond: Optional[Cond] = None) -> None:
     """Sets the plot box rotation given the elevation and azimuth angles in degrees. If ImPlot3DCond_Always is used, the rotation will be locked
@@ -630,7 +686,7 @@ def setup_box_rotation(rotation: Quat, animate: bool = False, cond: Optional[Con
     """
     pass
 
-# IMPLOT3D_API void SetupBoxInitialRotation(float elevation, float azimuth);    /* original C++ signature */
+# IMPLOT3D_API void SetupBoxInitialRotation(double elevation, double azimuth);    /* original C++ signature */
 @overload
 def setup_box_initial_rotation(elevation: float, azimuth: float) -> None:
     """Sets the plot box initial rotation given the elevation and azimuth angles in degrees. The initial rotation is the rotation the plot goes back to
@@ -646,7 +702,7 @@ def setup_box_initial_rotation(rotation: Quat) -> None:
     """
     pass
 
-# IMPLOT3D_API void SetupBoxScale(float x, float y, float z);    /* original C++ signature */
+# IMPLOT3D_API void SetupBoxScale(double x, double y, double z);    /* original C++ signature */
 def setup_box_scale(x: float, y: float, z: float) -> None:
     """Sets the plot box X/Y/Z scale. A scale of 1.0 is the default. Values greater than 1.0 enlarge the plot, while values between 0.0 and 1.0 shrink it"""
     pass
@@ -779,13 +835,13 @@ def plot_mesh(label_id: str, mesh: Mesh, flags: MeshFlags = 0) -> None:
 #
 # [/ADAPT_IMGUI_BUNDLE]
 
-# IMPLOT3D_API void PlotImage(const char* label_id, ImTextureID tex_ref, const ImPlot3DPoint& center, const ImPlot3DPoint& axis_u,    /* original C++ signature */
+# IMPLOT3D_API void PlotImage(const char* label_id, ImTextureRef tex_ref, const ImPlot3DPoint& center, const ImPlot3DPoint& axis_u,    /* original C++ signature */
 #                             const ImPlot3DPoint& axis_v, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1),
 #                             const ImVec4& tint_col = ImVec4(1, 1, 1, 1), ImPlot3DImageFlags flags = 0);
 @overload
 def plot_image(
     label_id: str,
-    tex_ref: ImTextureID,
+    tex_ref: ImTextureRef,
     center: Point,
     axis_u: Point,
     axis_v: Point,
@@ -810,14 +866,14 @@ def plot_image(
     """
     pass
 
-# IMPLOT3D_API void PlotImage(const char* label_id, ImTextureID tex_ref, const ImPlot3DPoint& p0, const ImPlot3DPoint& p1, const ImPlot3DPoint& p2,    /* original C++ signature */
+# IMPLOT3D_API void PlotImage(const char* label_id, ImTextureRef tex_ref, const ImPlot3DPoint& p0, const ImPlot3DPoint& p1, const ImPlot3DPoint& p2,    /* original C++ signature */
 #                             const ImPlot3DPoint& p3, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 0),
 #                             const ImVec2& uv2 = ImVec2(1, 1), const ImVec2& uv3 = ImVec2(0, 1), const ImVec4& tint_col = ImVec4(1, 1, 1, 1),
 #                             ImPlot3DImageFlags flags = 0);
 @overload
 def plot_image(
     label_id: str,
-    tex_ref: ImTextureID,
+    tex_ref: ImTextureRef,
     p0: Point,
     p1: Point,
     p2: Point,
@@ -846,7 +902,7 @@ def plot_image(
     """
     pass
 
-# IMPLOT3D_API void PlotText(const char* text, float x, float y, float z, float angle = 0.0f, const ImVec2& pix_offset = ImVec2(0, 0));    /* original C++ signature */
+# IMPLOT3D_API void PlotText(const char* text, double x, double y, double z, double angle = 0.0, const ImVec2& pix_offset = ImVec2(0, 0));    /* original C++ signature */
 def plot_text(
     text: str, x: float, y: float, z: float, angle: float = 0.0, pix_offset: Optional[ImVec2Like] = None
 ) -> None:
@@ -1149,14 +1205,17 @@ def show_demo_window(p_open: Optional[bool] = None) -> Optional[bool]:
 
 # IMPLOT3D_API void ShowAllDemos();    /* original C++ signature */
 def show_all_demos() -> None:
-    """Bundle: ShowAllDemos is extracted from ShowDemoWindow,
-    so that it can be used without creating an ImGui window.
-    """
+    """Shows all ImPlot3D demos, without enclosing window"""
     pass
 
 # IMPLOT3D_API void ShowStyleEditor(ImPlot3DStyle* ref = nullptr);    /* original C++ signature */
 def show_style_editor(ref: Optional[Style] = None) -> None:
     """Shows ImPlot3D style editor block (not a window)"""
+    pass
+
+# IMPLOT3D_API void ShowMetricsWindow(bool* p_popen = nullptr);    /* original C++ signature */
+def show_metrics_window(p_popen: Optional[bool] = None) -> Optional[bool]:
+    """Shows ImPlot3D metrics/debug information window."""
     pass
 
 # -----------------------------------------------------------------------------
@@ -1166,43 +1225,43 @@ def show_style_editor(ref: Optional[Style] = None) -> None:
 class Point:
     """ImPlot3DPoint: 3D vector to store points in 3D"""
 
-    # float x,     /* original C++ signature */
+    # double x,     /* original C++ signature */
     x: float
     # y,     /* original C++ signature */
     y: float
     # z;    /* original C++ signature */
     z: float
-    # constexpr ImPlot3DPoint() : x(0.0f), y(0.0f), z(0.0f) {}    /* original C++ signature */
+    # constexpr ImPlot3DPoint() : x(0.0), y(0.0), z(0.0) {}    /* original C++ signature */
     @overload
     def __init__(self) -> None:
         pass
-    # constexpr ImPlot3DPoint(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}    /* original C++ signature */
+    # constexpr ImPlot3DPoint(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}    /* original C++ signature */
     @overload
     def __init__(self, _x: float, _y: float, _z: float) -> None:
         pass
     # Accessors
-    # float& operator[](size_t idx) {    /* original C++ signature */
+    # double& operator[](size_t idx) {    /* original C++ signature */
     #         IM_ASSERT(idx == 0 || idx == 1 || idx == 2);
-    #         return ((float*)(void*)(char*)this)[idx];
+    #         return ((double*)(void*)(char*)this)[idx];
     #     }
     @overload
     def __getitem__(self, idx: int) -> float:
         """(private API)"""
         pass
-    # float operator[](size_t idx) const {    /* original C++ signature */
+    # double operator[](size_t idx) const {    /* original C++ signature */
     #         IM_ASSERT(idx == 0 || idx == 1 || idx == 2);
-    #         return ((const float*)(const void*)(const char*)this)[idx];
+    #         return ((const double*)(const void*)(const char*)this)[idx];
     #     }
     @overload
     def __getitem__(self, idx: int) -> float:
         """(private API)"""
         pass
     # Binary operators
-    # IMPLOT3D_API ImPlot3DPoint operator*(float rhs) const;    /* original C++ signature */
+    # IMPLOT3D_API ImPlot3DPoint operator*(double rhs) const;    /* original C++ signature */
     @overload
     def __mul__(self, rhs: float) -> Point:
         pass
-    # IMPLOT3D_API ImPlot3DPoint operator/(float rhs) const;    /* original C++ signature */
+    # IMPLOT3D_API ImPlot3DPoint operator/(double rhs) const;    /* original C++ signature */
     @overload
     def __truediv__(self, rhs: float) -> Point:
         pass
@@ -1227,11 +1286,11 @@ class Point:
         """Unary operator"""
         pass
     # Compound assignment operators
-    # IMPLOT3D_API ImPlot3DPoint& operator*=(float rhs);    /* original C++ signature */
+    # IMPLOT3D_API ImPlot3DPoint& operator*=(double rhs);    /* original C++ signature */
     @overload
     def __imul__(self, rhs: float) -> Point:
         pass
-    # IMPLOT3D_API ImPlot3DPoint& operator/=(float rhs);    /* original C++ signature */
+    # IMPLOT3D_API ImPlot3DPoint& operator/=(double rhs);    /* original C++ signature */
     @overload
     def __itruediv__(self, rhs: float) -> Point:
         pass
@@ -1256,7 +1315,7 @@ class Point:
     # IMPLOT3D_API bool operator!=(const ImPlot3DPoint& rhs) const;    /* original C++ signature */
     def __ne__(self, rhs: Point) -> bool:
         pass
-    # IMPLOT3D_API float Dot(const ImPlot3DPoint& rhs) const;    /* original C++ signature */
+    # IMPLOT3D_API double Dot(const ImPlot3DPoint& rhs) const;    /* original C++ signature */
     def dot(self, rhs: Point) -> float:
         """Dot product"""
         pass
@@ -1264,11 +1323,11 @@ class Point:
     def cross(self, rhs: Point) -> Point:
         """Cross product"""
         pass
-    # IMPLOT3D_API float Length() const;    /* original C++ signature */
+    # IMPLOT3D_API double Length() const;    /* original C++ signature */
     def length(self) -> float:
         """Get vector length"""
         pass
-    # IMPLOT3D_API float LengthSquared() const;    /* original C++ signature */
+    # IMPLOT3D_API double LengthSquared() const;    /* original C++ signature */
     def length_squared(self) -> float:
         """Get vector squared length"""
         pass
@@ -1365,26 +1424,26 @@ class Box:
 # -----------------------------------------------------------------------------
 
 class Range:
-    # float Min;    /* original C++ signature */
+    # double Min;    /* original C++ signature */
     min: float
-    # float Max;    /* original C++ signature */
+    # double Max;    /* original C++ signature */
     max: float
 
-    # constexpr ImPlot3DRange() : Min(0.0f), Max(0.0f) {}    /* original C++ signature */
+    # constexpr ImPlot3DRange() : Min(0.0), Max(0.0) {}    /* original C++ signature */
     @overload
     def __init__(self) -> None:
         pass
-    # constexpr ImPlot3DRange(float min, float max) : Min(min), Max(max) {}    /* original C++ signature */
+    # constexpr ImPlot3DRange(double min, double max) : Min(min), Max(max) {}    /* original C++ signature */
     @overload
     def __init__(self, min: float, max: float) -> None:
         pass
-    # IMPLOT3D_API void Expand(float value);    /* original C++ signature */
+    # IMPLOT3D_API void Expand(double value);    /* original C++ signature */
     def expand(self, value: float) -> None:
         pass
-    # IMPLOT3D_API bool Contains(float value) const;    /* original C++ signature */
+    # IMPLOT3D_API bool Contains(double value) const;    /* original C++ signature */
     def contains(self, value: float) -> bool:
         pass
-    # float Size() const { return Max - Min; }    /* original C++ signature */
+    # double Size() const { return Max - Min; }    /* original C++ signature */
     def size(self) -> float:
         """(private API)"""
         pass
@@ -1394,7 +1453,7 @@ class Range:
 # -----------------------------------------------------------------------------
 
 class Quat:
-    # float x,     /* original C++ signature */
+    # double x,     /* original C++ signature */
     x: float
     # y,     /* original C++ signature */
     y: float
@@ -1404,15 +1463,15 @@ class Quat:
     w: float
 
     # Constructors
-    # constexpr ImPlot3DQuat() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) {}    /* original C++ signature */
+    # constexpr ImPlot3DQuat() : x(0.0), y(0.0), z(0.0), w(1.0) {}    /* original C++ signature */
     @overload
     def __init__(self) -> None:
         pass
-    # constexpr ImPlot3DQuat(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}    /* original C++ signature */
+    # constexpr ImPlot3DQuat(double _x, double _y, double _z, double _w) : x(_x), y(_y), z(_z), w(_w) {}    /* original C++ signature */
     @overload
     def __init__(self, _x: float, _y: float, _z: float, _w: float) -> None:
         pass
-    # IMPLOT3D_API ImPlot3DQuat(float _angle, const ImPlot3DPoint& _axis);    /* original C++ signature */
+    # IMPLOT3D_API ImPlot3DQuat(double _angle, const ImPlot3DPoint& _axis);    /* original C++ signature */
     @overload
     def __init__(self, _angle: float, _axis: Point) -> None:
         pass
@@ -1421,12 +1480,12 @@ class Quat:
     def from_two_vectors(v0: Point, v1: Point) -> Quat:
         """Set quaternion from two vectors"""
         pass
-    # IMPLOT3D_API static ImPlot3DQuat FromElAz(float elevation, float azimuth);    /* original C++ signature */
+    # IMPLOT3D_API static ImPlot3DQuat FromElAz(double elevation, double azimuth);    /* original C++ signature */
     @staticmethod
     def from_el_az(elevation: float, azimuth: float) -> Quat:
         """Set quaternion given elevation and azimuth angles in radians"""
         pass
-    # IMPLOT3D_API float Length() const;    /* original C++ signature */
+    # IMPLOT3D_API double Length() const;    /* original C++ signature */
     def length(self) -> float:
         """Get quaternion length"""
         pass
@@ -1463,12 +1522,12 @@ class Quat:
     # IMPLOT3D_API bool operator!=(const ImPlot3DQuat& rhs) const;    /* original C++ signature */
     def __ne__(self, rhs: Quat) -> bool:
         pass
-    # IMPLOT3D_API static ImPlot3DQuat Slerp(const ImPlot3DQuat& q1, const ImPlot3DQuat& q2, float t);    /* original C++ signature */
+    # IMPLOT3D_API static ImPlot3DQuat Slerp(const ImPlot3DQuat& q1, const ImPlot3DQuat& q2, double t);    /* original C++ signature */
     @staticmethod
     def slerp(q1: Quat, q2: Quat, t: float) -> Quat:
         """Interpolate between two quaternions"""
         pass
-    # IMPLOT3D_API float Dot(const ImPlot3DQuat& rhs) const;    /* original C++ signature */
+    # IMPLOT3D_API double Dot(const ImPlot3DQuat& rhs) const;    /* original C++ signature */
     def dot(self, rhs: Quat) -> float:
         """Get quaternion dot product"""
         pass
@@ -1502,6 +1561,8 @@ class Style:
     plot_padding: ImVec2
     # ImVec2 LabelPadding;    /* original C++ signature */
     label_padding: ImVec2
+    # float ViewScaleFactor;    /* original C++ signature */
+    view_scale_factor: float
     # Legend style
     # ImVec2 LegendPadding;    /* original C++ signature */
     legend_padding: ImVec2  # Legend padding from plot edges
@@ -1540,8 +1601,6 @@ class Style:
 
 # Duck (Rubber Duck by Poly by Google [CC-BY] via Poly Pizza)
 
-# namespace ImPlot3D
-
 # #endif
 ####################    </generated_from:implot3d.h>    ####################
 
@@ -1554,6 +1613,7 @@ class Style:
 
 # Sets an axis' ticks and optionally the labels for the next plot. To keep the default ticks, set #keep_default=true.
 # IMPLOT3D_API void SetupAxisTicks(ImAxis3D axis, double v_min, double v_max, int n_ticks, const char* const labels[] = nullptr, bool keep_default = false);
+@overload
 def setup_axis_ticks(
     axis: ImAxis3D,
     v_min: float,
@@ -1566,6 +1626,7 @@ def setup_axis_ticks(
 
 # Sets an axis' ticks and optionally the labels for the next plot. To keep the default ticks, set #keep_default=true.
 # IMPLOT3D_API void SetupAxisTicks(ImAxis3D axis, const double* values, int n_ticks, const char* const labels[] = nullptr, bool keep_default = false);
+@overload
 def setup_axis_ticks(
     axis: ImAxis3D,
     values: List[float],

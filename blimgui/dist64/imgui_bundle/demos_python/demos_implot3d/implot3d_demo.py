@@ -6,6 +6,7 @@ from imgui_bundle.demos_python.demos_implot3d.implot3d_meshes import make_cube_m
 from imgui_bundle.demos_python.demo_utils.api_demos import set_hello_imgui_demo_assets_folder
 
 import numpy as np
+from numpy.typing import NDArray
 
 set_hello_imgui_demo_assets_folder()
 
@@ -13,41 +14,8 @@ set_hello_imgui_demo_assets_folder()
 # [SECTION] Demo Textures
 #-----------------------------------------------------------------------------
 
-def rgba_image_to_texture(image: np.ndarray) -> int:
-    """Upload an RGBA image to the GPU as a texture, returns the OpenGL texture ID."""
-    from OpenGL import GL
-    assert image.dtype == np.uint8 and image.ndim == 3 and image.shape[2] == 4
 
-    height, width = image.shape[:2]
-
-    # Generate a texture ID
-    texture_id = GL.glGenTextures(1)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, texture_id)
-
-    # Set texture parameters (you may want to adjust this)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
-
-    # Upload the image
-    GL.glTexImage2D(
-        GL.GL_TEXTURE_2D,
-        0,                  # level
-        GL.GL_RGBA,            # internal format
-        width,
-        height,
-        0,                  # border
-        GL.GL_RGBA,            # input format
-        GL.GL_UNSIGNED_BYTE,   # input type
-        image
-    )
-
-    GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
-    return texture_id
-
-
-def make_checkerboard_texture(size: int = 256, tile_size: int = 32) -> np.ndarray:
+def make_checkerboard_texture(size: int = 256, tile_size: int = 32) -> NDArray[np.uint8]:
     """Create a checkerboard RGBA texture as a numpy array."""
     img = np.zeros((size, size, 4), dtype=np.uint8)
     for y in range(size):
@@ -60,7 +28,7 @@ def make_checkerboard_texture(size: int = 256, tile_size: int = 32) -> np.ndarra
     return img
 
 
-def make_gradient_circle_texture(size: int = 256) -> np.ndarray:
+def make_gradient_circle_texture(size: int = 256) -> NDArray[np.uint8]:
     """Create a circular gradient texture with transparency and a color tint."""
     img = np.zeros((size, size, 4), dtype=np.uint8)
     center = size / 2
@@ -123,8 +91,8 @@ def demo_line_plots():
     if implot3d.begin_plot("Line Plots"):
         implot3d.setup_axes("x", "y", "z")
         implot3d.plot_line("f(x)", static.xs1, static.ys1, static.zs1)
-        implot3d.set_next_marker_style(implot3d.Marker_.circle.value)
-        implot3d.plot_line("g(x)", static.xs2, static.ys2, static.zs2, flags=implot3d.LineFlags_.segments.value)
+        implot3d.set_next_marker_style(implot3d.Marker_.circle)
+        implot3d.plot_line("g(x)", static.xs2, static.ys2, static.zs2, flags=implot3d.LineFlags_.segments)
         implot3d.end_plot()
 
 
@@ -145,9 +113,9 @@ def demo_scatter_plots():
     if implot3d.begin_plot("Scatter Plots"):
         implot3d.plot_scatter("Data 1", static.xs1, static.ys1, static.zs1)
 
-        implot3d.push_style_var(implot3d.StyleVar_.fill_alpha.value, 0.25)
+        implot3d.push_style_var(implot3d.StyleVar_.fill_alpha, 0.25)
         implot3d.set_next_marker_style(
-            implot3d.Marker_.square.value, 6,
+            implot3d.Marker_.square, 6,
             implot3d.get_colormap_color(1),  # Marker outline color
             implot3d.AUTO,  # Default weight
             implot3d.get_colormap_color(1)   # Marker fill color
@@ -199,7 +167,7 @@ def demo_triangle_plots():
         implot3d.set_next_fill_style(implot3d.get_colormap_color(0))
         implot3d.set_next_line_style(implot3d.get_colormap_color(1), 2)
         implot3d.set_next_marker_style(
-            implot3d.Marker_.square.value, 3,
+            implot3d.Marker_.square, 3,
             implot3d.get_colormap_color(2), implot3d.AUTO, implot3d.get_colormap_color(2)
         )
 
@@ -272,21 +240,21 @@ def demo_quad_plots():
         color_x = colors["X"]
         implot3d.set_next_fill_style(color_x)
         implot3d.set_next_line_style(color_x, 2)
-        implot3d.set_next_marker_style(implot3d.Marker_.square.value, 3, color_x, implot3d.AUTO, color_x)
+        implot3d.set_next_marker_style(implot3d.Marker_.square, 3, color_x, implot3d.AUTO, color_x)
         implot3d.plot_quad("X", static.xs[0:8], static.ys[0:8], static.zs[0:8])
 
         # Render +y and -y faces
         color_y = colors["Y"]
         implot3d.set_next_fill_style(color_y)
         implot3d.set_next_line_style(color_y, 2)
-        implot3d.set_next_marker_style(implot3d.Marker_.square.value, 3, color_y, implot3d.AUTO, color_y)
+        implot3d.set_next_marker_style(implot3d.Marker_.square, 3, color_y, implot3d.AUTO, color_y)
         implot3d.plot_quad("Y", static.xs[8:16], static.ys[8:16], static.zs[8:16])
 
         # Render +z and -z faces
         color_z = colors["Z"]
         implot3d.set_next_fill_style(color_z)
         implot3d.set_next_line_style(color_z, 2)
-        implot3d.set_next_marker_style(implot3d.Marker_.square.value, 3, color_z, implot3d.AUTO, color_z)
+        implot3d.set_next_marker_style(implot3d.Marker_.square, 3, color_z, implot3d.AUTO, color_z)
         implot3d.plot_quad("Z", static.xs[16:24], static.ys[16:24], static.zs[16:24])
 
         implot3d.end_plot()
@@ -361,9 +329,9 @@ def demo_surface_plots():
     if static.selected_fill == 1:
         implot3d.push_colormap(static.colormaps[static.sel_colormap])
 
-    if implot3d.begin_plot("Surface Plots", size=(-1, 400), flags=implot3d.Flags_.no_clip.value):
+    if implot3d.begin_plot("Surface Plots", size=(-1, 400), flags=implot3d.Flags_.no_clip):
         implot3d.setup_axes_limits(-1, 1, -1, 1, -1.5, 1.5)
-        implot3d.push_style_var(implot3d.StyleVar_.fill_alpha.value, 0.8)
+        implot3d.push_style_var(implot3d.StyleVar_.fill_alpha, 0.8)
 
         if static.selected_fill == 0:
             implot3d.set_next_fill_style(static.solid_color)
@@ -438,7 +406,7 @@ def demo_mesh_plots():
 
         if static.set_marker_color:
             implot3d.set_next_marker_style(
-                implot3d.Marker_.square.value, 3, static.marker_color, implot3d.AUTO, static.marker_color
+                implot3d.Marker_.square, 3, static.marker_color, implot3d.AUTO, static.marker_color
             )
 
         # Plot the selected mesh
@@ -456,7 +424,7 @@ def slider_implot3d_point(
         label: str, v: implot3d.Point,
         v_min: float, v_max: float, format: str = "%.3",
         flags: int = 0
-) -> [bool, implot3d.Point]:
+) -> tuple[bool, implot3d.Point]:
     as_floats = [v.x, v.y, v.z]
     changed, as_floats = imgui.slider_float3(label, as_floats, v_min, v_max, format, flags)
     return changed, implot3d.Point(as_floats[0], as_floats[1], as_floats[2])
@@ -489,11 +457,17 @@ def demo_image_plots():
         static.uv2 = ImVec2(1.0, 1.0)
         static.uv3 = ImVec2(0.0, 1.0)
 
+        # Create textures
+        # Step 1: create them as numpy arrays
         checker_img = make_checkerboard_texture()
         circle_img = make_gradient_circle_texture()
-
-        static.tex_id_checker = rgba_image_to_texture(checker_img)
-        static.tex_id_circle = rgba_image_to_texture(circle_img)
+        # Step 2: convert them to OpenGL textures (using imgui_bundle's immvision)
+        from imgui_bundle import immvision
+        static.tex_checker = immvision.GlTexture(checker_img)
+        static.tex_circle = immvision.GlTexture(circle_img)
+        # Step 3: create ImTextureRef from the OpenGL texture id
+        static.tex_id_checker = imgui.ImTextureRef(static.tex_checker.texture_id)
+        static.tex_id_circle = imgui.ImTextureRef(static.tex_circle.texture_id)
 
         static.initialized = True
 
@@ -526,7 +500,7 @@ def demo_image_plots():
 
     # tex_id = imgui.ImTextureRef(imgui.get_io().fonts.python_get_texture_id())
 
-    if implot3d.begin_plot("Image Plot", size=(-1, 0), flags=implot3d.Flags_.no_clip.value):
+    if implot3d.begin_plot("Image Plot", size=(-1, 0), flags=implot3d.Flags_.no_clip):
         implot3d.plot_image("Image 1", static.tex_id_checker,
                             center=static.center1,
                             axis_u=static.axis_u1,
@@ -573,13 +547,13 @@ def demo_realtime_plots():
                 static.data_z.add_point(mouse_y - plot_center_y)
 
         implot3d.setup_axes("Time", "Mouse X", "Mouse Y",
-                            implot3d.AxisFlags_.no_tick_labels.value,
-                            implot3d.AxisFlags_.no_tick_labels.value,
-                            implot3d.AxisFlags_.no_tick_labels.value)
+                            implot3d.AxisFlags_.no_tick_labels,
+                            implot3d.AxisFlags_.no_tick_labels,
+                            implot3d.AxisFlags_.no_tick_labels)
 
-        implot3d.setup_axis_limits(implot3d.ImAxis3D_.x.value, static.t - 10.0, static.t, implot3d.Cond_.always.value)
-        implot3d.setup_axis_limits(implot3d.ImAxis3D_.y.value, -400, 400, implot3d.Cond_.once.value)
-        implot3d.setup_axis_limits(implot3d.ImAxis3D_.z.value, -400, 400, implot3d.Cond_.once.value)
+        implot3d.setup_axis_limits(implot3d.ImAxis3D_.x, static.t - 10.0, static.t, implot3d.Cond_.always)
+        implot3d.setup_axis_limits(implot3d.ImAxis3D_.y, -400, 400, implot3d.Cond_.once)
+        implot3d.setup_axis_limits(implot3d.ImAxis3D_.z, -400, 400, implot3d.Cond_.once)
 
         # Get the valid data to plot
         x_data = static.data_x.get_data()
@@ -604,21 +578,21 @@ def demo_markers_and_text():
     _, static.mk_size = imgui.drag_float("Marker Size", static.mk_size, 0.1, 2.0, 10.0, "%.2f px")
     _, static.mk_weight = imgui.drag_float("Marker Weight", static.mk_weight, 0.05, 0.5, 3.0, "%.2f px")
 
-    if implot3d.begin_plot("##MarkerStyles", size=(-1, 0), flags=implot3d.Flags_.canvas_only.value):
+    if implot3d.begin_plot("##MarkerStyles", size=(-1, 0), flags=implot3d.Flags_.canvas_only):
         implot3d.setup_axes("", "", "",
-                            implot3d.AxisFlags_.no_decorations.value,
-                            implot3d.AxisFlags_.no_decorations.value,
-                            implot3d.AxisFlags_.no_decorations.value)
+                            implot3d.AxisFlags_.no_decorations,
+                            implot3d.AxisFlags_.no_decorations,
+                            implot3d.AxisFlags_.no_decorations)
 
-        implot3d.setup_axes_limits(-0.5, 1.5, -0.5, 1.5, 0, implot3d.Marker_.count.value + 1)
+        implot3d.setup_axes_limits(-0.5, 1.5, -0.5, 1.5, 0, implot3d.Marker_.count + 1)
 
         xs = np.zeros(2, dtype=np.float32)
         ys = np.zeros(2, dtype=np.float32)
-        zs = np.array([implot3d.Marker_.count.value, implot3d.Marker_.count.value + 1], dtype=np.float32)
+        zs = np.array([implot3d.Marker_.count, implot3d.Marker_.count + 1], dtype=np.float32)
 
         # Filled markers
-        for m in range(implot3d.Marker_.count.value):
-            angle = (zs[0] / float(implot3d.Marker_.count.value)) * 2 * np.pi
+        for m in range(implot3d.Marker_.count):
+            angle = (zs[0] / float(implot3d.Marker_.count)) * 2 * np.pi
             xs[1] = xs[0] + np.cos(angle) * 0.5
             ys[1] = ys[0] + np.sin(angle) * 0.5
 
@@ -629,11 +603,11 @@ def demo_markers_and_text():
             zs -= 1  # Move markers down in Z axis
 
         xs[0], ys[0] = 1, 1
-        zs[:] = [implot3d.Marker_.count.value, implot3d.Marker_.count.value + 1]
+        zs[:] = [implot3d.Marker_.count, implot3d.Marker_.count + 1]
 
         # Open markers
-        for m in range(implot3d.Marker_.count.value):
-            angle = (zs[0] / float(implot3d.Marker_.count.value)) * 2 * np.pi
+        for m in range(implot3d.Marker_.count):
+            angle = (zs[0] / float(implot3d.Marker_.count)) * 2 * np.pi
             xs[1] = xs[0] + np.cos(angle) * 0.5
             ys[1] = ys[0] - np.sin(angle) * 0.5
 
@@ -648,7 +622,7 @@ def demo_markers_and_text():
         implot3d.plot_text("Open Markers", 1.0, 1.0, 6.0)
 
         # Inlay text with color
-        implot3d.push_style_color(implot3d.Col_.inlay_text.value, [1, 0, 1, 1])
+        implot3d.push_style_color(implot3d.Col_.inlay_text, [1, 0, 1, 1])
         implot3d.plot_text("Rotated Text", 0.5, 0.5, 6.0, np.pi / 4, (0, 0))
         implot3d.pop_style_color()
 
@@ -674,11 +648,11 @@ def demo_nan_values():
     # UI: Controls for NaN handling
     _, static.include_nan = imgui.checkbox("Include NaN", static.include_nan)
     imgui.same_line()
-    _, static.flags = imgui.checkbox_flags("Skip NaN", static.flags, implot3d.LineFlags_.skip_nan.value)
+    _, static.flags = imgui.checkbox_flags("Skip NaN", static.flags, implot3d.LineFlags_.skip_nan)
 
     # Begin plot
     if implot3d.begin_plot("##NaNValues"):
-        implot3d.set_next_marker_style(implot3d.Marker_.square.value)
+        implot3d.set_next_marker_style(implot3d.Marker_.square)
         implot3d.plot_line("Line", data1, data2, data3, flags=static.flags)
         implot3d.end_plot()
 
@@ -742,14 +716,14 @@ def demo_box_rotation():
     _, static.init_azimuth = imgui.slider_float("Initial Azimuth", static.init_azimuth, -180.0, 180.0, "%.1f degrees")
 
     if implot3d.begin_plot("##BoxRotation"):
-        implot3d.setup_axes_limits(-1, 1, -1, 1, -1, 1, implot3d.Cond_.always.value)
+        implot3d.setup_axes_limits(-1, 1, -1, 1, -1, 1, implot3d.Cond_.always)
 
         # Set initial rotation
         implot3d.setup_box_initial_rotation(static.init_elevation, static.init_azimuth)
 
         # Set the rotation using the specified elevation and azimuth
         if changed:
-            implot3d.setup_box_rotation(static.elevation, static.azimuth, static.animate, implot3d.Cond_.always.value)
+            implot3d.setup_box_rotation(static.elevation, static.azimuth, static.animate, implot3d.Cond_.always)
 
         # Define axes lines
         origin = np.array([0.0, 0.0], dtype=np.float32)
@@ -787,16 +761,16 @@ def demo_tick_labels():
     if implot3d.begin_plot("##Ticks"):
         implot3d.setup_axes_limits(2, 5, 0, 1, 0, 1)
         if static.custom_ticks:
-            implot3d.setup_axis_ticks(axis = implot3d.ImAxis3D_.x.value, values=pi_list, labels = pi_str_list if static.custom_labels else [], keep_default=True)
-            implot3d.setup_axis_ticks(axis = implot3d.ImAxis3D_.y.value, values=letters_ticks, labels = letters_labels if static.custom_labels else [], keep_default=False)
-            implot3d.setup_axis_ticks(axis = implot3d.ImAxis3D_.z.value, v_min=0, v_max=1, n_ticks=6, labels = letters_labels if static.custom_labels else [], keep_default=False)
+            implot3d.setup_axis_ticks(axis = implot3d.ImAxis3D_.x, values=pi_list, labels = pi_str_list if static.custom_labels else [], keep_default=True)
+            implot3d.setup_axis_ticks(axis = implot3d.ImAxis3D_.y, values=letters_ticks, labels = letters_labels if static.custom_labels else [], keep_default=False)
+            implot3d.setup_axis_ticks(axis = implot3d.ImAxis3D_.z, v_min=0, v_max=1, n_ticks=6, labels = letters_labels if static.custom_labels else [], keep_default=False)
         implot3d.end_plot()
 
 
 def demo_custom_styles():
     # Apply Seaborn style
     import copy
-    implot3d.push_colormap(implot3d.Colormap_.deep.value)
+    implot3d.push_colormap(implot3d.Colormap_.deep)
     backup_style = copy.copy(implot3d.get_style())
     style_seaborn()
 
@@ -858,23 +832,23 @@ def demo_custom_rendering():
 
 def style_seaborn():
     style = implot3d.get_style()
-    style.set_color(implot3d.Col_.line.value, implot3d.AUTO_COL)
-    style.set_color(implot3d.Col_.fill.value, implot3d.AUTO_COL)
-    style.set_color(implot3d.Col_.marker_outline.value, implot3d.AUTO_COL)
-    style.set_color(implot3d.Col_.marker_fill.value, implot3d.AUTO_COL)
-    style.set_color(implot3d.Col_.frame_bg.value, ImVec4(1.00, 1.00, 1.00, 1.00))
-    style.set_color(implot3d.Col_.plot_bg.value, ImVec4(0.92, 0.92, 0.95, 1.00))
-    style.set_color(implot3d.Col_.plot_border.value, ImVec4(0.00, 0.00, 0.00, 0.00))
-    style.set_color(implot3d.Col_.legend_bg.value, ImVec4(0.92, 0.92, 0.95, 1.00))
-    style.set_color(implot3d.Col_.legend_border.value, ImVec4(0.80, 0.81, 0.85, 1.00))
-    style.set_color(implot3d.Col_.legend_text.value, ImVec4(0.00, 0.00, 0.00, 1.00))
-    style.set_color(implot3d.Col_.title_text.value, ImVec4(0.00, 0.00, 0.00, 1.00))
-    style.set_color(implot3d.Col_.inlay_text.value, ImVec4(0.00, 0.00, 0.00, 1.00))
-    style.set_color(implot3d.Col_.axis_text.value, ImVec4(0.00, 0.00, 0.00, 1.00))
-    style.set_color(implot3d.Col_.axis_grid.value, ImVec4(1.00, 1.00, 1.00, 1.00))
+    style.set_color(implot3d.Col_.line, implot3d.AUTO_COL)
+    style.set_color(implot3d.Col_.fill, implot3d.AUTO_COL)
+    style.set_color(implot3d.Col_.marker_outline, implot3d.AUTO_COL)
+    style.set_color(implot3d.Col_.marker_fill, implot3d.AUTO_COL)
+    style.set_color(implot3d.Col_.frame_bg, ImVec4(1.00, 1.00, 1.00, 1.00))
+    style.set_color(implot3d.Col_.plot_bg, ImVec4(0.92, 0.92, 0.95, 1.00))
+    style.set_color(implot3d.Col_.plot_border, ImVec4(0.00, 0.00, 0.00, 0.00))
+    style.set_color(implot3d.Col_.legend_bg, ImVec4(0.92, 0.92, 0.95, 1.00))
+    style.set_color(implot3d.Col_.legend_border, ImVec4(0.80, 0.81, 0.85, 1.00))
+    style.set_color(implot3d.Col_.legend_text, ImVec4(0.00, 0.00, 0.00, 1.00))
+    style.set_color(implot3d.Col_.title_text, ImVec4(0.00, 0.00, 0.00, 1.00))
+    style.set_color(implot3d.Col_.inlay_text, ImVec4(0.00, 0.00, 0.00, 1.00))
+    style.set_color(implot3d.Col_.axis_text, ImVec4(0.00, 0.00, 0.00, 1.00))
+    style.set_color(implot3d.Col_.axis_grid, ImVec4(1.00, 1.00, 1.00, 1.00))
 
     style.line_weight = 1.5
-    style.marker = implot3d.Marker_.none.value
+    style.marker = implot3d.Marker_.none
     style.marker_size = 4
     style.marker_weight = 1
     style.fill_alpha = 1.0
@@ -1029,9 +1003,9 @@ def show_demo_window():
         imgui.show_demo_window()
 
     # Set window properties
-    imgui.set_next_window_pos((100, 100), imgui.Cond_.first_use_ever.value)
-    imgui.set_next_window_size((600, 750), imgui.Cond_.first_use_ever.value)
-    imgui.begin("ImPlot3D Demo", None, imgui.WindowFlags_.menu_bar.value)
+    imgui.set_next_window_pos((100, 100), imgui.Cond_.first_use_ever)
+    imgui.set_next_window_size((600, 750), imgui.Cond_.first_use_ever)
+    imgui.begin("ImPlot3D Demo", None, imgui.WindowFlags_.menu_bar)
     if imgui.begin_menu_bar():
         if imgui.begin_menu("Tools"):
             _, static.show_implot3d_style_editor = imgui.menu_item("Style Editor", "", static.show_implot3d_style_editor)

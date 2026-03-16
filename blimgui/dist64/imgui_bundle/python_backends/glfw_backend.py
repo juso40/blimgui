@@ -2,10 +2,10 @@
 from __future__ import absolute_import
 
 from imgui_bundle import imgui
-import glfw  # type: ignore
+import glfw  # pip install glfw
 
 from imgui_bundle.python_backends import compute_fb_scale
-from .opengl_backend import ProgrammablePipelineRenderer
+from .opengl_backend_programmable import ProgrammablePipelineRenderer
 
 from typing import Dict
 
@@ -30,7 +30,8 @@ class GlfwRenderer(ProgrammablePipelineRenderer):
         self.io.display_size = glfw.get_framebuffer_size(self.window)
 
         def get_clipboard_text(_ctx: imgui.internal.Context) -> str:
-            return glfw.get_clipboard_string(self.window)
+            s = glfw.get_clipboard_string(self.window)
+            return s.decode()
 
         def set_clipboard_text(_ctx: imgui.internal.Context, text: str) -> None:
             glfw.set_clipboard_string(self.window, text)

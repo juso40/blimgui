@@ -8,8 +8,12 @@ from __future__ import annotations
 
 from typing import Any, Callable, Literal, NamedTuple
 
-from pydantic_core import CoreConfig, CoreSchema, ValidationError
+from pydantic_core._pydantic_core import ValidationError
+from pydantic_core.core_schema import CoreSchema
+
 from typing_extensions import Protocol, TypeAlias
+
+from pydantic.config import ExtraValues
 
 __all__ = (
     'PydanticPluginProtocol',
@@ -44,7 +48,7 @@ class PydanticPluginProtocol(Protocol):
         schema_type: Any,
         schema_type_path: SchemaTypePath,
         schema_kind: SchemaKind,
-        config: CoreConfig | None,
+        config: dict | None,
         plugin_settings: dict[str, object],
     ) -> tuple[
         ValidatePythonHandlerProtocol | None, ValidateJsonHandlerProtocol | None, ValidateStringsHandlerProtocol | None
@@ -113,8 +117,9 @@ class ValidatePythonHandlerProtocol(BaseValidateHandlerProtocol, Protocol):
         input: Any,
         *,
         strict: bool | None = None,
+        extra: ExtraValues | None = None,
         from_attributes: bool | None = None,
-        context: dict[str, Any] | None = None,
+        context: Any | None = None,
         self_instance: Any | None = None,
         by_alias: bool | None = None,
         by_name: bool | None = None,
@@ -124,6 +129,7 @@ class ValidatePythonHandlerProtocol(BaseValidateHandlerProtocol, Protocol):
         Args:
             input: The input to be validated.
             strict: Whether to validate the object in strict mode.
+            extra: Whether to ignore, allow, or forbid extra data during model validation.
             from_attributes: Whether to validate objects as inputs by extracting attributes.
             context: The context to use for validation, this is passed to functional validators.
             self_instance: An instance of a model to set attributes on from validation, this is used when running
@@ -131,7 +137,6 @@ class ValidatePythonHandlerProtocol(BaseValidateHandlerProtocol, Protocol):
             by_alias: Whether to use the field's alias to match the input data to an attribute.
             by_name: Whether to use the field's name to match the input data to an attribute.
         """
-        pass
 
 
 class ValidateJsonHandlerProtocol(BaseValidateHandlerProtocol, Protocol):
@@ -142,7 +147,8 @@ class ValidateJsonHandlerProtocol(BaseValidateHandlerProtocol, Protocol):
         input: str | bytes | bytearray,
         *,
         strict: bool | None = None,
-        context: dict[str, Any] | None = None,
+        extra: ExtraValues | None = None,
+        context: Any | None = None,
         self_instance: Any | None = None,
         by_alias: bool | None = None,
         by_name: bool | None = None,
@@ -152,13 +158,13 @@ class ValidateJsonHandlerProtocol(BaseValidateHandlerProtocol, Protocol):
         Args:
             input: The JSON data to be validated.
             strict: Whether to validate the object in strict mode.
+            extra: Whether to ignore, allow, or forbid extra data during model validation.
             context: The context to use for validation, this is passed to functional validators.
             self_instance: An instance of a model to set attributes on from validation, this is used when running
                 validation from the `__init__` method of a model.
             by_alias: Whether to use the field's alias to match the input data to an attribute.
             by_name: Whether to use the field's name to match the input data to an attribute.
         """
-        pass
 
 
 StringInput: TypeAlias = 'dict[str, StringInput]'
@@ -172,7 +178,8 @@ class ValidateStringsHandlerProtocol(BaseValidateHandlerProtocol, Protocol):
         input: StringInput,
         *,
         strict: bool | None = None,
-        context: dict[str, Any] | None = None,
+        extra: ExtraValues | None = None,
+        context: Any | None = None,
         by_alias: bool | None = None,
         by_name: bool | None = None,
     ) -> None:
@@ -181,8 +188,8 @@ class ValidateStringsHandlerProtocol(BaseValidateHandlerProtocol, Protocol):
         Args:
             input: The string data to be validated.
             strict: Whether to validate the object in strict mode.
+            extra: Whether to ignore, allow, or forbid extra data during model validation.
             context: The context to use for validation, this is passed to functional validators.
             by_alias: Whether to use the field's alias to match the input data to an attribute.
             by_name: Whether to use the field's name to match the input data to an attribute.
         """
-        pass

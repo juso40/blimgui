@@ -26,6 +26,8 @@ DefaultScreenSize = (800, 600)
 
 # #ifdef IMGUI_BUNDLE_WITH_IMPLOT_AND_IMGUI_NODE_EDITOR
 #
+# These functions wrap ImPlot::BeginPlot and ImPlot::EndPlot,
+# but they enable to make the plot content draggable inside a node
 def begin_plot_in_node_editor(
     title_id: str, size: Optional[ImVec2Like] = None, flags: ImPlotFlags = 0
 ) -> bool:
@@ -315,7 +317,7 @@ def delete_node_editor_settings(runner_params: HelloImGui.RunnerParams) -> None:
 
 # <submodule manual_render>
 class manual_render:  # Proxy class that introduces typings for the *submodule* manual_render
-    pass  # (This corresponds to a C++ namespace. All method are static!)
+    pass  # (This corresponds to a C++ namespace. All methods are static!)
     """ namespace ManualRender"""
     # Immapp::ManualRender is a namespace that groups functions, allowing fine-grained control over the rendering process:
     # - It is customizable like Immapp::Run: initialize it with `RunnerParams` and `AddOnsParams`.
@@ -405,7 +407,7 @@ def clock_seconds() -> float:
 
 # <submodule code_utils>
 class code_utils:  # Proxy class that introduces typings for the *submodule* code_utils
-    pass  # (This corresponds to a C++ namespace. All method are static!)
+    pass  # (This corresponds to a C++ namespace. All methods are static!)
     """ namespace CodeUtils"""
 
     @staticmethod
@@ -427,12 +429,12 @@ class code_utils:  # Proxy class that introduces typings for the *submodule* cod
 
 # <submodule snippets>
 class snippets:  # Proxy class that introduces typings for the *submodule* snippets
-    pass  # (This corresponds to a C++ namespace. All method are static!)
+    pass  # (This corresponds to a C++ namespace. All methods are static!)
     #
     # TextEditorBundle: addition to ImGuiColorTextEdit, specific to ImGuiBundle
     #
 
-    class SnippetLanguage(enum.Enum):
+    class SnippetLanguage(enum.IntEnum):
         cpp = enum.auto()  # (= 0)
         hlsl = enum.auto()  # (= 1)
         glsl = enum.auto()  # (= 2)
@@ -442,7 +444,7 @@ class snippets:  # Proxy class that introduces typings for the *submodule* snipp
         lua = enum.auto()  # (= 6)
         python = enum.auto()  # (= 7)
 
-    class SnippetTheme(enum.Enum):
+    class SnippetTheme(enum.IntEnum):
         dark = enum.auto()  # (= 0)
         light = enum.auto()  # (= 1)
         retro_blue = enum.auto()  # (= 2)

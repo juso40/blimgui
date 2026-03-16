@@ -6,7 +6,8 @@ import functools
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Callable, Literal, TypeVar
 
-from pydantic_core import CoreConfig, CoreSchema, SchemaValidator, ValidationError
+from pydantic_core._pydantic_core import SchemaValidator, ValidationError
+from pydantic_core.core_schema import CoreSchema
 from typing_extensions import ParamSpec
 
 if TYPE_CHECKING:

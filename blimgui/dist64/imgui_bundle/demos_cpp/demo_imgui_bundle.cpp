@@ -92,9 +92,9 @@ int main(int, char **)
 #define DEMO_DETAILS(label, function_name) DemoDetails{ label, #function_name, function_name }
 
     std::vector<DemoDetails> demos {
-        DEMO_DETAILS("Dear ImGui Bundle", demo_imgui_bundle_intro),
+        DEMO_DETAILS("Intro", demo_imgui_bundle_intro),
         DEMO_DETAILS("Dear ImGui", demo_imgui_show_demo_window),
-        DEMO_DETAILS("Immediate Apps", demo_immapp_launcher),
+        DEMO_DETAILS("Demo Apps", demo_immapp_launcher),
         DEMO_DETAILS("Implot [3D]", demo_implot),
         DEMO_DETAILS("Node Editor", demo_node_editor_launcher),
         DEMO_DETAILS("Markdown", demo_imgui_md),
@@ -127,6 +127,13 @@ int main(int, char **)
         }
         nbFrames += 1;
     };
+
+    auto showEditFontScaleInStatusBar = [&runnerParams]()
+    {
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x / 10.f);
+        ImGui::SliderFloat("Font scale", & ImGui::GetStyle().FontScaleMain, 0.5f, 5.f);
+    };
+    runnerParams.callbacks.ShowStatus = showEditFontScaleInStatusBar;
 
     runnerParams.callbacks.ShowGui = showGui;
     runnerParams.useImGuiTestEngine = true;

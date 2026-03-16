@@ -12,6 +12,8 @@ try:
     HOOK_ADDRESSES = {
         Game.Willow1: "Engine.GameViewportClient:Tick",
         Game.Willow2: "WillowGame.WillowGameViewportClient:Tick",
+        # BL4:
+        Game.Oak2: "/Script/Engine.CameraModifier:BlueprintModifyCamera",
     }
 except AttributeError:
     # Fallback while the SDK's nightly is not released
@@ -27,7 +29,7 @@ class HookBasedBackend(RenderBackend):
 
         add_hook(
             hook_addr,
-            Type.POST_UNCONDITIONAL,
+            Type.POST,  #  use POST like BL4 mods
             "blimgui_hooked_render",
             self.render,
         )

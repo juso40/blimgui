@@ -3,7 +3,9 @@ from __future__ import annotations
 from collections.abc import Iterator, Mapping
 from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, TypeVar, Union
 
-from pydantic_core import CoreSchema, SchemaSerializer, SchemaValidator
+
+from pydantic_core.core_schema import CoreSchema
+from pydantic_core._pydantic_core import SchemaSerializer, SchemaValidator
 
 from ..errors import PydanticErrorCodes, PydanticUserError
 from ..plugin._schema_validator import PluggableSchemaValidator

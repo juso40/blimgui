@@ -15,7 +15,6 @@ Basically:
 
 from typing import List, Tuple
 import math
-import munch  # type: ignore
 
 from imgui_bundle import imgui, imguizmo, hello_imgui, ImVec2, immapp
 from imgui_bundle.demos_python.demo_utils.api_demos import GuiFunction
@@ -119,9 +118,9 @@ def EditTransform(
 ) -> None:
     statics = EditTransform.statics
     global mCurrentGizmoOperation
-    if statics is None:
-        EditTransform.statics = munch.Munch()
-        statics = EditTransform.statics
+
+    statics = EditTransform
+    if not hasattr(statics, "initialized"):
         statics.mCurrentGizmoMode = gizmo.MODE.local
         statics.useSnap = False
         statics.snap = Matrix3([1.0, 1.0, 1.0])
@@ -130,6 +129,7 @@ def EditTransform(
         statics.boundSizing = False
         statics.boundSizingSnap = False
         statics.gizmoWindowFlags = 0
+        statics.initialized = True
 
     if editTransformDecomposition:
         if imgui.is_key_pressed(imgui.Key.t):
@@ -211,10 +211,10 @@ def EditTransform(
     viewManipulateTop = 0.0
 
     if useWindow:
-        imgui.set_next_window_size(ImVec2(800, 400), imgui.Cond_.appearing.value)
-        imgui.set_next_window_pos(ImVec2(400, 20), imgui.Cond_.appearing.value)
+        imgui.set_next_window_size(ImVec2(800, 400), imgui.Cond_.appearing)
+        imgui.set_next_window_pos(ImVec2(400, 20), imgui.Cond_.appearing)
         imgui.push_style_color(
-            imgui.Col_.window_bg.value, imgui.ImColor(0.35, 0.3, 0.3).value
+            imgui.Col_.window_bg, imgui.ImColor(0.35, 0.3, 0.3).value
         )
         imgui.begin("Gizmo", None, statics.gizmoWindowFlags)
         gizmo.set_drawlist()
@@ -309,12 +309,12 @@ def make_closure_demo_guizmo() -> GuiFunction:
         gizmo.set_orthographic(not isPerspective)
         gizmo.begin_frame()
 
-        imgui.set_next_window_pos(ImVec2(1024, 100), imgui.Cond_.appearing.value)
-        imgui.set_next_window_size(ImVec2(256, 256), imgui.Cond_.appearing.value)
+        imgui.set_next_window_pos(ImVec2(1024, 100), imgui.Cond_.appearing)
+        imgui.set_next_window_size(ImVec2(256, 256), imgui.Cond_.appearing)
 
         # create a window and insert the inspector
-        imgui.set_next_window_pos(ImVec2(10, 10), imgui.Cond_.appearing.value)
-        imgui.set_next_window_size(ImVec2(320, 340), imgui.Cond_.appearing.value)
+        imgui.set_next_window_pos(ImVec2(10, 10), imgui.Cond_.appearing)
+        imgui.set_next_window_size(ImVec2(320, 340), imgui.Cond_.appearing)
         imgui.begin("Editor")
         if imgui.radio_button("Full view", not useWindow):
             useWindow = False
@@ -376,8 +376,9 @@ def make_closure_demo_guizmo() -> GuiFunction:
         imgui.separator()
 
         for matId in range(gizmoCount):
-            gizmo.set_id(matId)
+            gizmo.push_id(matId)
             EditTransform(cameraView, cameraProjection, gObjectMatrix[matId], lastUsing == matId)
+            gizmo.pop_id()
 
         imgui.end()
 

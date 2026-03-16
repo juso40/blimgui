@@ -103,7 +103,9 @@ def resume_editor_canvas() -> None:
 
 # ------------------------------------------------------------------------------
 
-class PinKind(enum.Enum):
+# ------------------------------------------------------------------------------
+
+class PinKind(enum.IntEnum):
     """------------------------------------------------------------------------------"""
 
     # Input,    /* original C++ signature */
@@ -112,14 +114,14 @@ class PinKind(enum.Enum):
     # }
     output = enum.auto()  # (= 1)
 
-class FlowDirection(enum.Enum):
+class FlowDirection(enum.IntEnum):
     # Forward,    /* original C++ signature */
     forward = enum.auto()  # (= 0)
     # Backward    /* original C++ signature */
     # }
     backward = enum.auto()  # (= 1)
 
-class CanvasSizeMode(enum.Enum):
+class CanvasSizeMode(enum.IntEnum):
     # FitVerticalView,            /* original C++ signature */
     fit_vertical_view = (
         enum.auto()
@@ -131,7 +133,7 @@ class CanvasSizeMode(enum.Enum):
     # CenterOnly,                 /* original C++ signature */
     center_only = enum.auto()  # (= 2)  # Previous view will be centered on new view
 
-class SaveReasonFlags(enum.Enum):
+class SaveReasonFlags(enum.IntEnum):
     """------------------------------------------------------------------------------"""
 
     # None       = 0x00000000,    /* original C++ signature */
@@ -211,7 +213,7 @@ class Config:
     def __init__(self) -> None:
         pass
 
-class StyleColor(enum.Enum):
+class StyleColor(enum.IntEnum):
     """------------------------------------------------------------------------------"""
 
     # StyleColor_Bg,    /* original C++ signature */
@@ -257,7 +259,7 @@ class StyleColor(enum.Enum):
     # }
     count = enum.auto()  # (= 19)
 
-class StyleVar(enum.Enum):
+class StyleVar(enum.IntEnum):
     # StyleVar_NodePadding,    /* original C++ signature */
     node_padding = enum.auto()  # (= 0)
     # StyleVar_NodeRounding,    /* original C++ signature */
@@ -967,9 +969,9 @@ def canvas_to_screen(pos: ImVec2Like) -> ImVec2:
 
 # IMGUI_NODE_EDITOR_API int GetNodeCount();                                    /* original C++ signature */
 def get_node_count() -> int:
+    """Returns number of submitted nodes since Begin() call"""
     pass
 
-# Returns number of submitted nodes since Begin() call
 # #ifdef IMGUI_BUNDLE_PYTHON_API
 #
 # IMGUI_NODE_EDITOR_API std::vector<NodeId> GetOrderedNodeIds();    /* original C++ signature */
@@ -983,8 +985,6 @@ def get_ordered_node_ids() -> List[NodeId]:
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-
-# namespace ax
 
 # ------------------------------------------------------------------------------
 # # endif

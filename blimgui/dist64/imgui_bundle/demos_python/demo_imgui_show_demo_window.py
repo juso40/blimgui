@@ -1,4 +1,4 @@
-# Part of ImGui Bundle - MIT License - Copyright (c) 2022-2023 Pascal Thomet - https://github.com/pthom/imgui_bundle
+# Part of ImGui Bundle - MIT License - Copyright (c) 2022-2025 Pascal Thomet - https://github.com/pthom/imgui_bundle
 from imgui_bundle import imgui, imgui_md, immapp, ImVec2
 from imgui_bundle.demos_python import demo_utils  # this will set the assets folder
 import webbrowser
@@ -33,14 +33,14 @@ def demo_gui():
     # SetImGuiDemoCodeWindowPos(ImVec2(ImGui::GetCursorScreenPos().x + windowSize.x, ImGui::GetCursorScreenPos().y) ,
     # windowSize, ImGuiCond_Appearing);
     window_size = ImVec2(imgui.get_content_region_avail().x / 2, imgui.get_content_region_avail().y)
-    imgui.set_imgui_demo_window_pos(imgui.get_cursor_screen_pos(), window_size, imgui.Cond_.appearing.value)
+    imgui.set_imgui_demo_window_pos(imgui.get_cursor_screen_pos(), window_size, imgui.Cond_.appearing)
     imgui.set_imgui_demo_code_window_pos(
         ImVec2(
             imgui.get_cursor_screen_pos().x + window_size.x,
             imgui.get_cursor_screen_pos().y,
         ),
         window_size,
-        imgui.Cond_.appearing.value,
+        imgui.Cond_.appearing,
     )
     imgui.show_demo_window()
 

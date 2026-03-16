@@ -1,6 +1,22 @@
+# ===== BLImGui bootstrap: force bundled deps (BL4 / Python 3.14) =====
+import sys
+from pathlib import Path
+import importlib
+
+base = Path(__file__).parent.absolute()
+dist64 = str(base / "dist64")
+dist32 = str(base / "dist32")
+
+# Remove any previous occurrences so we can control priority
+for p in (dist64, dist32):
+    if p in sys.path:
+        sys.path.remove(p)
+
+# Do NOT import imgui/pydantic before this finishes
+# ===================================================
+
 import site
 from collections.abc import Callable
-from pathlib import Path
 from typing import Any
 
 from mods_base import Game, Library, build_mod, options
@@ -8,17 +24,102 @@ from mods_base.keybinds import keybind
 
 THREADED_RENDERING = False
 
+# Select the correct dist folder and put it FIRST on sys.path
 match Game.get_tree():
     case Game.Oak:
-        site.addsitedir(str(Path(__file__).parent.absolute() / "dist64"))
+        sys.path.insert(0, dist64)
         THREADED_RENDERING = True
-    case Game.Willow2:
-        site.addsitedir(str(Path(__file__).parent.absolute() / "dist32"))
-    case Game.Willow1:
-        site.addsitedir(str(Path(__file__).parent.absolute() / "dist32"))
-    case _:
-        raise RuntimeError("Unknown Game.")
 
+    case Game.Willow2:
+        sys.path.insert(0, dist32)
+
+    case Game.Willow1:
+        sys.path.insert(0, dist32)
+
+    case Game.Oak2:  # BL4
+        sys.path.insert(0, dist64)
+        THREADED_RENDERING = False
+
+    case _:
+        raise RuntimeError(f"Unknown Game: {Game.get_tree()}")
+
+# 🔴 Force-load the REAL pydantic_core binary from our dist64 and override any shadow package
+try:
+    import importlib.util
+    import importlib.machinery
+    from pathlib import Path
+
+    pdc_path = Path(dist64) / "pydantic_core"
+
+    # Find the .pyd file (e.g. _pydantic_core.cp314-win_amd64.pyd)
+    pyd_files = list(pdc_path.glob("_pydantic_core*.pyd"))
+    if not pyd_files:
+        raise RuntimeError("No _pydantic_core*.pyd found in dist64/pydantic_core")
+
+    pyd_file = pyd_files[0]
+
+    # Load the extension module directly
+    spec = importlib.util.spec_from_file_location("pydantic_core._pydantic_core", pyd_file)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Failed to create spec for pydantic_core binary")
+
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    # Create a proper package object for pydantic_core
+    pkg = importlib.util.module_from_spec(
+        importlib.machinery.ModuleSpec("pydantic_core", loader=None, is_package=True)
+    )
+    pkg.__path__ = [str(pdc_path)]
+
+    # Expose symbols from the binary
+    pkg._pydantic_core = module
+    for name in ("PydanticCustomError", "PydanticKnownError", "__version__"):
+        if hasattr(module, name):
+            setattr(pkg, name, getattr(module, name))
+
+    # 🔧 Re-export common symbols expected by pydantic
+    for name in ("CoreSchema", "PydanticOmit", "to_jsonable_python"):
+        if hasattr(module, name):
+            setattr(pkg, name, getattr(module, name))
+
+    # 🔧 ALSO load the core_schema Python module and attach it
+    core_schema_spec = importlib.util.spec_from_file_location(
+        "pydantic_core.core_schema", pdc_path / "core_schema.py"
+    )
+    if core_schema_spec is None or core_schema_spec.loader is None:
+        raise RuntimeError("Failed to load pydantic_core.core_schema")
+
+    core_schema_mod = importlib.util.module_from_spec(core_schema_spec)
+    core_schema_spec.loader.exec_module(core_schema_mod)
+
+    pkg.core_schema = core_schema_mod
+
+    # 🔧 Expose MISSING sentinel expected by pydantic
+    try:
+        from pydantic._internal import _utils as _pyd_utils
+
+        pkg.MISSING = _pyd_utils.MISSING
+    except Exception:
+        # Fallback: create a unique sentinel
+        class _MissingSentinel:
+            pass
+
+
+        pkg.MISSING = _MissingSentinel()
+
+    # Register in sys.modules, overriding anything the game provided
+    sys.modules["pydantic_core"] = pkg
+    sys.modules["pydantic_core._pydantic_core"] = module
+    sys.modules["pydantic_core.core_schema"] = core_schema_mod
+
+    print("BLImGui forced REAL pydantic_core from:", pyd_file)
+
+except Exception as e:
+    print("BLImGui failed to force-load REAL pydantic_core:", e)
+
+
+# ONLY NOW import imgui (and anything that pulls pydantic)
 from imgui_bundle import (
     hello_imgui,  # type: ignore
     imgui,

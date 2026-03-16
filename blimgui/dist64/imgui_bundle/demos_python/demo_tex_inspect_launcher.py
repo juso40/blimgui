@@ -1,4 +1,4 @@
-# Part of ImGui Bundle - MIT License - Copyright (c) 2022-2023 Pascal Thomet - https://github.com/pthom/imgui_bundle
+# Part of ImGui Bundle - MIT License - Copyright (c) 2022-2025 Pascal Thomet - https://github.com/pthom/imgui_bundle
 import os.path
 import subprocess
 import sys
@@ -22,19 +22,21 @@ def demo_gui():
     if imgui.collapsing_header("Simple Demo"):
         demos_tex_inspect.demo_tex_inspect_simple.demo_gui()
         demo_utils.show_python_vs_cpp_file("demos_tex_inspect/demo_tex_inspect_simple")
-    if imgui.collapsing_header("Full Demo"):
-        imgui.text("Click the button below to launch the demo")
-        if imgui.button("Run demo"):
-            this_dir = os.path.dirname(__file__)
-            subprocess.Popen(
-                [
-                    sys.executable,
-                    this_dir + "/demos_tex_inspect/demo_tex_inspect_demo_window.py",
-                ]
+
+    if demo_utils.can_run_subprocess():
+        if imgui.collapsing_header("Full Demo"):
+            imgui.text("Click the button below to launch the demo")
+            if imgui.button("Run demo"):
+                this_dir = os.path.dirname(__file__)
+                subprocess.Popen(
+                    [
+                        sys.executable,
+                        this_dir + "/demos_tex_inspect/demo_tex_inspect_demo_window.py",
+                    ]
+                )
+            demo_utils.show_python_vs_cpp_file(
+                "demos_tex_inspect/demo_tex_inspect_demo_window"
             )
-        demo_utils.show_python_vs_cpp_file(
-            "demos_tex_inspect/demo_tex_inspect_demo_window"
-        )
 
 
 def main():

@@ -1,4 +1,4 @@
-# Part of ImGui Bundle - MIT License - Copyright (c) 2022-2023 Pascal Thomet - https://github.com/pthom/imgui_bundle
+# Part of ImGui Bundle - MIT License - Copyright (c) 2022-2025 Pascal Thomet - https://github.com/pthom/imgui_bundle
 import os
 
 from imgui_bundle import imgui_md
@@ -66,15 +66,12 @@ def make_gui() -> GuiFunction:
             "demo_pydantic",
             "Python: How to use ImVec2 and ImVec4 with Pydantic",
         ),
-        DemoApp(
-            "demo_font_common_glyph_range",
-            "How to load fonts with specific glyph ranges (e.g., Chinese, Japanese, Korean)",
-        ),
-        DemoApp(
-            "imgui_example_glfw_opengl3",
-            "Python: translation of the [GLFW+OpenGL3 example](https://github.com/ocornut/imgui/blob/master/examples/example_glfw_opengl3/main.cpp) from Dear ImGui. "
-            "Demonstrates how to port from C++ to Python (here, *backend rendering is implemented in C++*)",
-        ),
+        # Disabled since v1.92 (use pure Python backend instead)
+        # DemoApp(
+        #     "imgui_example_glfw_opengl3",
+        #     "Python: translation of the [GLFW+OpenGL3 example](https://github.com/ocornut/imgui/blob/master/examples/example_glfw_opengl3/main.cpp) from Dear ImGui. "
+        #     "Demonstrates how to port from C++ to Python (here, *backend rendering is implemented in C++*)",
+        # ),
         DemoApp(
             "example_python_backend_glfw3",
             "Python: how to use ImGui with GLFW3 using a *full python* backend",

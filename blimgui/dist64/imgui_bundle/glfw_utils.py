@@ -1,8 +1,9 @@
-# Part of ImGui Bundle - MIT License - Copyright (c) 2022-2023 Pascal Thomet - https://github.com/pthom/imgui_bundle
+# Part of ImGui Bundle - MIT License - Copyright (c) 2022-2025 Pascal Thomet - https://github.com/pthom/imgui_bundle
 from typing import cast
 
 try:
-    import glfw  # type: ignore
+    import glfw  # pip install glfw
+
 
     def glfw_window_hello_imgui() -> glfw._GLFWwindow:
         """Return the main glfw window used by HelloImGui (when the backend is GLFW)
@@ -15,6 +16,16 @@ try:
         window_pointer = ctypes.cast(window_address, ctypes.POINTER(glfw._GLFWwindow))
         return cast(glfw._GLFWwindow, window_pointer)
 
-except ImportError:
+
+except (ImportError, ModuleNotFoundError):
+
+
+    def glfw_window_hello_imgui() -> None:
+        import sys
+        print("""Please install glfw, so that glfw_window_hello_imgui works:
+        pip install glfw""")
+        sys.exit(1)
+
+
     pass
     # print("Warning: could not import glfw")

@@ -8,7 +8,7 @@ from imgui_bundle.imgui import ImVec2, ImVec4, ImU32, ID, ImVec2Like, ImVec4Like
 from imgui_bundle.imgui.internal import ImRect
 from imgui_bundle.implot3d import (
     Colormap, Marker, Flags, Col, Point, LegendFlags, AxisFlags, Location,
-    Quat, Ray, Range, Cond, Style, ItemFlags
+    Quat, Ray, Range, Cond, Style, ItemFlags, ImAxis3D
     )
 
 
@@ -58,39 +58,44 @@ from imgui_bundle.implot3d import (
 #-----------------------------------------------------------------------------
 
 
+# Computes the common (base-10) logarithm
 # static inline float ImLog10(float x) { return log10f(x); }    /* original C++ signature */
+@overload
 def im_log10(x: float) -> float:
-    """ Computes the common (base-10) logarithm
-    (private API)
-    """
+    """(private API)"""
+    pass
+# static inline double ImLog10(double x) { return log10(x); }    /* original C++ signature */
+@overload
+def im_log10(x: float) -> float:
+    """(private API)"""
     pass
 # Flips a flag in a flagset
-# static inline bool ImNan(float val) { return isnan(val); }    /* original C++ signature */
+# static inline bool ImNan(double val) { return isnan(val); }    /* original C++ signature */
 def im_nan(val: float) -> bool:
     """ Returns True if val is NAN
     (private API)
     """
     pass
-# static inline bool ImNanOrInf(float val) { return !(val >= -FLT_MAX && val <= FLT_MAX) || ImNan(val); }    /* original C++ signature */
+# static inline bool ImNanOrInf(double val) { return !(val >= -DBL_MAX && val <= DBL_MAX) || ImNan(val); }    /* original C++ signature */
 def im_nan_or_inf(val: float) -> bool:
     """ Returns True if val is NAN or INFINITY
     (private API)
     """
     pass
-# static inline double ImConstrainNan(float val) { return ImNan(val) ? 0 : val; }    /* original C++ signature */
+# static inline double ImConstrainNan(double val) { return ImNan(val) ? 0 : val; }    /* original C++ signature */
 def im_constrain_nan(val: float) -> float:
     """ Turns NANs to 0s
     (private API)
     """
     pass
-# static inline double ImConstrainInf(double val) { return val >= FLT_MAX ? FLT_MAX : val <= -FLT_MAX ? -FLT_MAX : val; }    /* original C++ signature */
+# static inline double ImConstrainInf(double val) { return val >= DBL_MAX ? DBL_MAX : val <= -DBL_MAX ? -DBL_MAX : val; }    /* original C++ signature */
 def im_constrain_inf(val: float) -> float:
     """ Turns infinity to floating point maximums
     (private API)
     """
     pass
 # static inline bool ImAlmostEqual(double v1, double v2, int ulp = 2) {    /* original C++ signature */
-#     return ImAbs(v1 - v2) < FLT_EPSILON * ImAbs(v1 + v2) * ulp || ImAbs(v1 - v2) < FLT_MIN;
+#     return ImAbs(v1 - v2) < DBL_EPSILON * ImAbs(v1 + v2) * ulp || ImAbs(v1 - v2) < DBL_MIN;
 # }
 def im_almost_equal(v1: float, v2: float, ulp: int = 2) -> bool:
     """ True if two numbers are approximately equal using units in the last place.
@@ -461,7 +466,7 @@ class ItemGroup:
 
 class Tick:
     """ Tick mark info"""
-    # float PlotPos;    /* original C++ signature */
+    # double PlotPos;    /* original C++ signature */
     plot_pos: float
     # bool Major;    /* original C++ signature */
     major: bool
@@ -475,7 +480,7 @@ class Tick:
     idx: int
 
     # ImPlot3DTick(double value, bool major, bool show_label) {    /* original C++ signature */
-    #         PlotPos = (float)value;
+    #         PlotPos = value;
     #         Major = major;
     #         ShowLabel = show_label;
     #         TextOffset = -1;
@@ -542,14 +547,18 @@ class Ticker:
 
 class Axis:
     """ Holds axis information"""
+    # Flags
     # ImPlot3DAxisFlags Flags;    /* original C++ signature */
     flags: AxisFlags
     # ImPlot3DAxisFlags PreviousFlags;    /* original C++ signature */
     previous_flags: AxisFlags
+    # Range
     # ImPlot3DRange Range;    /* original C++ signature */
     range: Range
     # ImPlot3DCond RangeCond;    /* original C++ signature */
     range_cond: Cond
+    # double NDCScale;    /* original C++ signature */
+    ndc_scale: float
     # Ticks
     # ImPlot3DTicker Ticker;    /* original C++ signature */
     ticker: Ticker
@@ -562,6 +571,11 @@ class Axis:
     fit_this_frame: bool
     # ImPlot3DRange FitExtents;    /* original C++ signature */
     fit_extents: Range
+    # Constraints
+    # ImPlot3DRange ConstraintRange;    /* original C++ signature */
+    constraint_range: Range
+    # ImPlot3DRange ConstraintZoom;    /* original C++ signature */
+    constraint_zoom: Range
     # User input
     # bool Hovered;    /* original C++ signature */
     hovered: bool
@@ -571,9 +585,10 @@ class Axis:
     # ImPlot3DAxis() {    /* original C++ signature */
     #         PreviousFlags = Flags = ImPlot3DAxisFlags_None;
     #         // Range
-    #         Range.Min = 0.0f;
-    #         Range.Max = 1.0f;
+    #         Range.Min = 0.0;
+    #         Range.Max = 1.0;
     #         RangeCond = ImPlot3DCond_None;
+    #         NDCScale = 1.0;
     #         // Ticks
     #         Formatter = nullptr;
     #         FormatterData = nullptr;
@@ -581,8 +596,10 @@ class Axis:
     #         ShowDefaultTicks = true;
     #         // Fit data
     #         FitThisFrame = true;
-    #         FitExtents.Min = HUGE_VAL;
-    #         FitExtents.Max = -HUGE_VAL;
+    #         FitExtents = ImPlot3DRange(HUGE_VAL, -HUGE_VAL);
+    #         // Constraints
+    #         ConstraintRange = ImPlot3DRange(-INFINITY, INFINITY);
+    #         ConstraintZoom = ImPlot3DRange(DBL_MIN, INFINITY);
     #         // User input
     #         Hovered = false;
     #         Held = false;
@@ -592,22 +609,27 @@ class Axis:
         pass
 
     # inline void Reset() {    /* original C++ signature */
+    #         RangeCond = ImPlot3DCond_None;
+    #         // Ticks
+    #         Ticker.Reset();
     #         Formatter = nullptr;
     #         FormatterData = nullptr;
     #         Locator = nullptr;
     #         ShowDefaultTicks = true;
-    #         FitExtents.Min = HUGE_VAL;
-    #         FitExtents.Max = -HUGE_VAL;
-    #         RangeCond = ImPlot3DCond_None;
-    #         Ticker.Reset();
+    #         // Fit data
+    #         FitExtents = ImPlot3DRange(HUGE_VAL, -HUGE_VAL);
+    #         // Constraints
+    #         ConstraintRange = ImPlot3DRange(-INFINITY, INFINITY);
+    #         ConstraintZoom = ImPlot3DRange(DBL_MIN, INFINITY);
     #     }
     def reset(self) -> None:
         """(private API)"""
         pass
 
     # inline void SetRange(double v1, double v2) {    /* original C++ signature */
-    #         Range.Min = (float)ImMin(v1, v2);
-    #         Range.Max = (float)ImMax(v1, v2);
+    #         Range.Min = ImMin(v1, v2);
+    #         Range.Max = ImMax(v1, v2);
+    #         Constrain();
     #     }
     def set_range(self, v1: float, v2: float) -> None:
         """(private API)"""
@@ -616,9 +638,21 @@ class Axis:
     # inline bool SetMin(double _min, bool force = false) {    /* original C++ signature */
     #         if (!force && IsLockedMin())
     #             return false;
-    #         _min = ImPlot3D::ImConstrainNan((float)ImPlot3D::ImConstrainInf(_min));
+    #         _min = ImPlot3D::ImConstrainNan(ImPlot3D::ImConstrainInf(_min));
+    #
+    #         // Constraints
+    #         if (_min < ConstraintRange.Min)
+    #             _min = ConstraintRange.Min;
+    #         double zoom = Range.Max - _min;
+    #         if (zoom < ConstraintZoom.Min)
+    #             _min = Range.Max - ConstraintZoom.Min;
+    #         if (zoom > ConstraintZoom.Max)
+    #             _min = Range.Max - ConstraintZoom.Max;
+    #
+    #         // Ensure min is less than max
     #         if (_min >= Range.Max)
     #             return false;
+    #
     #         Range.Min = (float)_min;
     #         return true;
     #     }
@@ -629,13 +663,49 @@ class Axis:
     # inline bool SetMax(double _max, bool force = false) {    /* original C++ signature */
     #         if (!force && IsLockedMax())
     #             return false;
-    #         _max = ImPlot3D::ImConstrainNan((float)ImPlot3D::ImConstrainInf(_max));
+    #         _max = ImPlot3D::ImConstrainNan(ImPlot3D::ImConstrainInf(_max));
+    #
+    #         // Constraints
+    #         if (_max > ConstraintRange.Max)
+    #             _max = ConstraintRange.Max;
+    #         double zoom = _max - Range.Min;
+    #         if (zoom < ConstraintZoom.Min)
+    #             _max = Range.Min + ConstraintZoom.Min;
+    #         if (zoom > ConstraintZoom.Max)
+    #             _max = Range.Min + ConstraintZoom.Max;
+    #
+    #         // Ensure max is greater than min
     #         if (_max <= Range.Min)
     #             return false;
     #         Range.Max = (float)_max;
     #         return true;
     #     }
     def set_max(self, _max: float, force: bool = False) -> bool:
+        """(private API)"""
+        pass
+
+    # inline void Constrain() {    /* original C++ signature */
+    #         Range.Min = ImPlot3D::ImConstrainNan(ImPlot3D::ImConstrainInf(Range.Min));
+    #         Range.Max = ImPlot3D::ImConstrainNan(ImPlot3D::ImConstrainInf(Range.Max));
+    #         if (Range.Min < ConstraintRange.Min)
+    #             Range.Min = ConstraintRange.Min;
+    #         if (Range.Max > ConstraintRange.Max)
+    #             Range.Max = ConstraintRange.Max;
+    #         double zoom = Range.Size();
+    #         if (zoom < ConstraintZoom.Min) {
+    #             double delta = (ConstraintZoom.Min - zoom) * 0.5;
+    #             Range.Min -= delta;
+    #             Range.Max += delta;
+    #         }
+    #         if (zoom > ConstraintZoom.Max) {
+    #             double delta = (zoom - ConstraintZoom.Max) * 0.5;
+    #             Range.Min += delta;
+    #             Range.Max -= delta;
+    #         }
+    #         if (Range.Max <= Range.Min)
+    #             Range.Max = Range.Min + DBL_EPSILON;
+    #     }
+    def constrain(self) -> None:
         """(private API)"""
         pass
 
@@ -668,6 +738,22 @@ class Axis:
         """(private API)"""
         pass
 
+    # inline bool IsPanLocked(bool increasing) {    /* original C++ signature */
+    #         if (ImPlot3D::ImHasFlag(Flags, ImPlot3DAxisFlags_PanStretch)) {
+    #             return IsInputLocked();
+    #         } else {
+    #             if (IsLockedMin() || IsLockedMax() || IsAutoFitting())
+    #                 return false;
+    #             if (increasing)
+    #                 return Range.Max == ConstraintRange.Max;
+    #             else
+    #                 return Range.Min == ConstraintRange.Min;
+    #         }
+    #     }
+    def is_pan_locked(self, increasing: bool) -> bool:
+        """(private API)"""
+        pass
+
     # inline void SetLabel(const char* label) {    /* original C++ signature */
     #         Label.Buf.shrink(0);
     #         if (label && ImGui::FindRenderedTextEnd(label, nullptr) != label)
@@ -679,6 +765,36 @@ class Axis:
 
     # inline const char* GetLabel() const { return Label.Buf.Data; }    /* original C++ signature */
     def get_label(self) -> str:
+        """(private API)"""
+        pass
+
+    # inline double NDCSize() const {    /* original C++ signature */
+    #         // By default, the axis span from NDC -0.5 to 0.5, so size is 1.0
+    #         // If NDCScale is applied, the size is scaled accordingly
+    #         return NDCScale;
+    #     }
+    def ndc_size(self) -> float:
+        """(private API)"""
+        pass
+
+    # inline void SetAspect(double units_per_ndc_unit) {    /* original C++ signature */
+    #         double new_size = units_per_ndc_unit * NDCSize();
+    #         double delta = (new_size - Range.Size()) * 0.5;
+    #         if (IsLocked())
+    #             return;
+    #         else if (IsLockedMin() && !IsLockedMax())
+    #             SetRange(Range.Min, Range.Max + 2 * delta);
+    #         else if (!IsLockedMin() && IsLockedMax())
+    #             SetRange(Range.Min - 2 * delta, Range.Max);
+    #         else
+    #             SetRange(Range.Min - delta, Range.Max + delta);
+    #     }
+    def set_aspect(self, units_per_ndc_unit: float) -> None:
+        """(private API)"""
+        pass
+
+    # double GetAspect() const { return Range.Size() / NDCSize(); }    /* original C++ signature */
+    def get_aspect(self) -> float:
         """(private API)"""
         pass
 
@@ -702,7 +818,7 @@ class Axis:
     def is_auto_fitting(self) -> bool:
         """(private API)"""
         pass
-    # void ExtendFit(float value);    /* original C++ signature */
+    # void ExtendFit(double value);    /* original C++ signature */
     def extend_fit(self, value: float) -> None:
         """(private API)"""
         pass
@@ -737,8 +853,6 @@ class Plot:
     rotation: Quat                # Current rotation quaternion
     # ImPlot3DCond RotationCond;    /* original C++ signature */
     rotation_cond: Cond
-    # ImPlot3DPoint BoxScale;    /* original C++ signature */
-    box_scale: Point              # Scale factor for plot box X, Y, Z axes
     # Animation
     # float AnimationTime;    /* original C++ signature */
     animation_time: float         # Remaining animation time
@@ -755,6 +869,8 @@ class Plot:
     held_edge_idx: int            # Index of the edge being held
     # int HeldPlaneIdx;    /* original C++ signature */
     held_plane_idx: int           # Index of the plane being held
+    # ImPlot3DPoint DragRotationAxis;    /* original C++ signature */
+    drag_rotation_axis: Point     # Axis of rotation for the duration of a drag
     # bool FitThisFrame;    /* original C++ signature */
     # Fit data
     fit_this_frame: bool
@@ -771,18 +887,18 @@ class Plot:
     #         PreviousFlags = Flags = ImPlot3DFlags_None;
     #         JustCreated = true;
     #         Initialized = false;
-    #         InitialRotation = ImPlot3DQuat(-0.513269f, -0.212596f, -0.318184f, 0.76819f);
-    #         Rotation = ImPlot3DQuat(0.0f, 0.0f, 0.0f, 1.0f);
+    #         InitialRotation = ImPlot3DQuat(-0.513269, -0.212596, -0.318184, 0.76819);
+    #         Rotation = ImPlot3DQuat(0.0, 0.0, 0.0, 1.0);
     #         RotationCond = ImPlot3DCond_None;
     #         for (int i = 0; i < 3; i++)
     #             Axes[i] = ImPlot3DAxis();
-    #         BoxScale = ImPlot3DPoint(1.0f, 1.0f, 1.0f);
     #         AnimationTime = 0.0f;
     #         RotationAnimationEnd = Rotation;
     #         SetupLocked = false;
     #         Hovered = Held = false;
     #         HeldEdgeIdx = -1;
     #         HeldPlaneIdx = -1;
+    #         DragRotationAxis = ImPlot3DPoint(0.0, 0.0, 0.0);
     #         FitThisFrame = true;
     #         ContextClick = false;
     #         OpenContextThisFrame = false;
@@ -813,27 +929,59 @@ class Plot:
 
     # void ExtendFit(const ImPlot3DPoint& point);    /* original C++ signature */
     def extend_fit(self, point: Point) -> None:
-        """(private API)"""
+        """ Extends the fit range of all three axes to include the provided point
+        (private API)
+        """
         pass
+
     # ImPlot3DPoint RangeMin() const;    /* original C++ signature */
     def range_min(self) -> Point:
-        """(private API)"""
+        """ Returns the minimum of the range in all three dimensions
+        (private API)
+        """
         pass
+
     # ImPlot3DPoint RangeMax() const;    /* original C++ signature */
     def range_max(self) -> Point:
-        """(private API)"""
+        """ Returns the maximum of the range in all three dimensions
+        (private API)
+        """
         pass
+
     # ImPlot3DPoint RangeCenter() const;    /* original C++ signature */
     def range_center(self) -> Point:
-        """(private API)"""
+        """ Returns the point at the center of the range in all three dimensions
+        (private API)
+        """
         pass
+
     # void SetRange(const ImPlot3DPoint& min, const ImPlot3DPoint& max);    /* original C++ signature */
     def set_range(self, min: Point, max: Point) -> None:
-        """(private API)"""
+        """ Sets the range of all three axes
+        (private API)
+        """
         pass
-    # float GetBoxZoom() const;    /* original C++ signature */
-    def get_box_zoom(self) -> float:
-        """(private API)"""
+
+    # float GetViewScale() const;    /* original C++ signature */
+    def get_view_scale(self) -> float:
+        """ Returns the scale of the plot view (constant to convert from NDC coordinates to pixels coordinates)
+        (private API)
+        """
+        pass
+
+    # ImPlot3DPoint GetBoxScale() const;    /* original C++ signature */
+    def get_box_scale(self) -> Point:
+        """ Returns the scale of the plot box in each dimension
+        (private API)
+        """
+        pass
+
+    # void ApplyEqualAspect(ImAxis3D ref_axis);    /* original C++ signature */
+    def apply_equal_aspect(self, ref_axis: ImAxis3D) -> None:
+        """ Applies equal aspect ratio constraint using the specified axis as reference.
+         Other axes are adjusted to match the reference axis's aspect ratio (units per NDC unit).
+        (private API)
+        """
         pass
 
 class Context:
@@ -900,6 +1048,20 @@ def get_auto_color(idx: Col) -> ImVec4:
 def get_style_color_name(idx: Col) -> str:
     pass
 
+# Returns white or black text given background color
+# static inline ImU32 CalcTextColor(const ImVec4& bg) {    /* original C++ signature */
+#     return (bg.x * 0.299f + bg.y * 0.587f + bg.z * 0.114f) > 0.5f ? IM_COL32_BLACK : IM_COL32_WHITE;
+# }
+@overload
+def calc_text_color(bg: ImVec4Like) -> ImU32:
+    """(private API)"""
+    pass
+# static inline ImU32 CalcTextColor(ImU32 bg) { return CalcTextColor(ImGui::ColorConvertU32ToFloat4(bg)); }    /* original C++ signature */
+@overload
+def calc_text_color(bg: ImU32) -> ImU32:
+    """(private API)"""
+    pass
+
 # IMPLOT3D_API const ImPlot3DNextItemData& GetItemData();    /* original C++ signature */
 def get_item_data() -> NextItemData:
     """ Get styling data for next item (call between BeginItem/EndItem)"""
@@ -913,6 +1075,12 @@ def get_colormap_color_u32(idx: int, cmap: Colormap) -> ImU32:
 # IMPLOT3D_API ImU32 NextColormapColorU32();    /* original C++ signature */
 def next_colormap_color_u32() -> ImU32:
     """ Returns the next unused colormap color and advances the colormap. Can be used to skip colors if desired"""
+    pass
+
+# IMPLOT3D_API void RenderColorBar(const ImU32* colors, int size, ImDrawList& DrawList, const ImRect& bounds, bool vert, bool reversed,    /* original C++ signature */
+#                                  bool continuous);
+def render_color_bar(colors: ImU32, size: int, draw_list: ImDrawList, bounds: ImRect, vert: bool, reversed: bool, continuous: bool) -> None:
+    """ Render a colormap bar"""
     pass
 
 #-----------------------------------------------------------------------------
@@ -1012,7 +1180,6 @@ def setup_lock() -> None:
 
 
 
-# namespace ImPlot3D
 
 # #endif
 ####################    </generated_from:implot3d_internal.h>    ####################

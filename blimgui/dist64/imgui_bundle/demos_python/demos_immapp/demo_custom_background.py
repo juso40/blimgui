@@ -8,7 +8,7 @@ if os.getenv("XDG_SESSION_TYPE") == "wayland" and not os.getenv("PYOPENGL_PLATFO
 from imgui_bundle import hello_imgui, imgui, immapp, ImVec2, ImVec4, imgui_md
 from imgui_bundle.demos_python import demo_utils
 
-import OpenGL.GL as GL  # type: ignore
+import OpenGL.GL as GL  # pip install PyOpenGL
 
 from dataclasses import dataclass
 import sys
@@ -538,8 +538,8 @@ def custom_background(app_state: AppState):
 
 def gui(app_state: AppState):
     """GUI for modifying shader parameters."""
-    imgui.set_next_window_pos(hello_imgui.em_to_vec2(0.0, 0.0), imgui.Cond_.appearing.value)
-    imgui.set_next_window_size(hello_imgui.em_to_vec2(31.0, 14.0), imgui.Cond_.appearing.value)
+    imgui.set_next_window_pos(hello_imgui.em_to_vec2(0.0, 0.0), imgui.Cond_.appearing)
+    imgui.set_next_window_size(hello_imgui.em_to_vec2(31.0, 14.0), imgui.Cond_.appearing)
     imgui.begin("Shader parameters")
 
     imgui_md.render_unindented("""
