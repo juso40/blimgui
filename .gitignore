@@ -194,3 +194,10 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# Allow everything in the vendored folders
+!blimgui/dist32/**/*
+!blimgui/dist64/**/*
+# Except for pycache folders!
+blimgui/dist32/**/__pycache__/
+blimgui/dist64/**/__pycache__/

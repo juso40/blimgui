@@ -244,32 +244,50 @@ glVertexAttrib4fv=wrapper.wrapper(glVertexAttrib4fv).setInputArraySize(
 from OpenGL import converters
 from OpenGL.lazywrapper import lazy as _lazy
 from OpenGL._bytes import _NULL_8_BYTE
-from OpenGL import contextdata 
+from OpenGL import contextdata
 
 glShaderSource = platform.createExtensionFunction(
-    'glShaderSource', dll=platform.PLATFORM.GLES2,
+    'glShaderSource',
+    dll=platform.PLATFORM.GLES2,
     resultType=None,
-    argTypes=(_types.GLhandle, _types.GLsizei, ctypes.POINTER(ctypes.c_char_p), arrays.GLintArray,),
-    doc = 'glShaderSource( GLhandle(shaderObj),[bytes(string),...]) -> None',
-    argNames = ('shaderObj', 'count', 'string', 'length',),
-    extension = _EXTENSION_NAME,
+    argTypes=(
+        _types.GLhandle,
+        _types.GLsizei,
+        ctypes.POINTER(ctypes.c_char_p),
+        arrays.GLintArray,
+    ),
+    doc='glShaderSource( GLhandle(shaderObj),[bytes(string),...]) -> None',
+    argNames=(
+        'shaderObj',
+        'count',
+        'string',
+        'length',
+    ),
+    extension=_EXTENSION_NAME,
 )
 
-conv = converters.StringLengths( name='string' )
-glShaderSource = wrapper.wrapper(
-    glShaderSource
-).setPyConverter(
-    'count' # number of strings
-).setPyConverter(
-    'length' # lengths of strings
-).setPyConverter(
-    'string', conv.stringArray
-).setCResolver(
-    'string', conv.stringArrayForC,
-).setCConverter(
-    'length', conv,
-).setCConverter(
-    'count', conv.totalCount,
+conv = converters.StringLengths(name='string')
+glShaderSource = (
+    wrapper.wrapper(glShaderSource)
+    .setPyConverter(
+        'count'  # number of strings
+    )
+    .setPyConverter(
+        'length'  # lengths of strings
+    )
+    .setPyConverter('string', conv.stringArray)
+    .setCResolver(
+        'string',
+        conv.stringArrayForC,
+    )
+    .setCConverter(
+        'length',
+        conv,
+    )
+    .setCConverter(
+        'count',
+        conv.totalCount,
+    )
 )
 try:
     del conv
@@ -277,48 +295,51 @@ except NameError as err:
     pass
 
 
-@_lazy( glGetShaderInfoLog )
-def glGetShaderInfoLog( baseOperation, obj ):
+@_lazy(glGetShaderInfoLog)
+def glGetShaderInfoLog(baseOperation, obj):
     """Retrieve the shader's error messages as a Python string
 
     returns string which is '' if no message
     """
     target = GLsizei()
-    glGetShaderiv(obj, GL_INFO_LOG_LENGTH,target)
+    glGetShaderiv(obj, GL_INFO_LOG_LENGTH, target)
     length = target.value
     if length > 0:
         log = ctypes.create_string_buffer(length)
         baseOperation(obj, length, None, log)
-        return log.value.strip(_NULL_8_BYTE) # null-termination
+        return log.value.strip(_NULL_8_BYTE)  # null-termination
     return ''
-@_lazy( glGetProgramInfoLog )
-def glGetProgramInfoLog( baseOperation, obj ):
+
+
+@_lazy(glGetProgramInfoLog)
+def glGetProgramInfoLog(baseOperation, obj):
     """Retrieve the shader program's error messages as a Python string
 
     returns string which is '' if no message
     """
     target = GLsizei()
-    glGetProgramiv(obj, GL_INFO_LOG_LENGTH,target)
+    glGetProgramiv(obj, GL_INFO_LOG_LENGTH, target)
     length = target.value
     if length > 0:
         log = ctypes.create_string_buffer(length)
         baseOperation(obj, length, None, log)
-        return log.value.strip(_NULL_8_BYTE) # null-termination
+        return log.value.strip(_NULL_8_BYTE)  # null-termination
     return ''
 
-@_lazy( glGetAttachedShaders )
-def glGetAttachedShaders( baseOperation, obj ):
+
+@_lazy(glGetAttachedShaders)
+def glGetAttachedShaders(baseOperation, obj):
     """Retrieve the attached objects as an array of GLhandle instances"""
-    length= glGetProgramiv( obj, GL_ATTACHED_SHADERS )
+    length = glGetProgramiv(obj, GL_ATTACHED_SHADERS)
     if length > 0:
-        storage = arrays.GLuintArray.zeros( (length,))
-        baseOperation( obj, length, None, storage )
+        storage = arrays.GLuintArray.zeros((length,))
+        baseOperation(obj, length, None, storage)
         return storage
-    return arrays.GLuintArray.zeros( (0,))
+    return arrays.GLuintArray.zeros((0,))
 
 
-@_lazy( glGetShaderSource )
-def glGetShaderSource( baseOperation, obj ):
+@_lazy(glGetShaderSource)
+def glGetShaderSource(baseOperation, obj):
     """Retrieve the program/shader's source code as a Python string
 
     returns string which is '' if no source code
@@ -327,93 +348,113 @@ def glGetShaderSource( baseOperation, obj ):
     if length > 0:
         source = ctypes.create_string_buffer(length)
         baseOperation(obj, length, None, source)
-        return source.value.strip(_NULL_8_BYTE) # null-termination
+        return source.value.strip(_NULL_8_BYTE)  # null-termination
     return ''
 
-@_lazy( glGetActiveUniform )
-def glGetActiveUniform(baseOperation,program, index,bufSize=None,*args):
+
+@_lazy(glGetActiveUniform)
+def glGetActiveUniform(baseOperation, program, index, bufSize=None, *args):
     """Retrieve the name, size and type of the uniform of the index in the program
-    
+
     program -- specifies the program to be queried
-    index -- index of the uniform to be queried 
-    
+    index -- index of the uniform to be queried
+
     Following parameters are optional:
-    
+
     bufSize -- determines the size of the buffer (limits number of bytes written),
                if not provided, will be GL_OBJECT_ACTIVE_UNIFORM_MAX_LENGTH
     length -- pointer-to-GLsizei that will hold the resulting length of the name
     size -- pointer-to-GLint that will hold the size of the attribute
     type -- pointer-to-GLenum that will hold the type constant of the attribute
     name -- pointer-to-GLchar that will hold the (null-terminated) name string
-    
+
     returns (bytes) name, (int)size, (enum)type
     """
-    max_index = int(glGetProgramiv( program, GL_ACTIVE_UNIFORMS ))
+    max_index = int(glGetProgramiv(program, GL_ACTIVE_UNIFORMS))
     if bufSize is None:
-        bufSize = int(glGetProgramiv( program, GL_ACTIVE_UNIFORM_MAX_LENGTH))
+        bufSize = int(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH))
     if index < max_index and index >= 0:
-        length,name,size,type = baseOperation( program, index, bufSize, *args )
-        if hasattr(name,'tostring'):
+        length, name, size, type = baseOperation(program, index, bufSize, *args)
+        if hasattr(name, 'tobytes'):
+            name = name.tobytes().rstrip(b'\000')
+        elif hasattr(name, 'tostring'):
             name = name.tostring().rstrip(b'\000')
-        elif hasattr(name,'value'):
+        elif hasattr(name, 'value'):
             name = name.value
-        return name,size,type
-    raise IndexError( 'Index %s out of range 0 to %i' % (index, max_index - 1, ) )
+        return name, size, type
+    raise IndexError(
+        'Index %s out of range 0 to %i'
+        % (
+            index,
+            max_index - 1,
+        )
+    )
 
-@_lazy( glGetActiveAttrib )
-def glGetActiveAttrib(baseOperation, program, index, bufSize=None,*args):
+
+@_lazy(glGetActiveAttrib)
+def glGetActiveAttrib(baseOperation, program, index, bufSize=None, *args):
     """Retrieves information about the attribute variable.
 
     program -- specifies the program to be queried
-    index -- index of the attribute to be queried 
-    
+    index -- index of the attribute to be queried
+
     Following parameters are optional:
-    
+
     bufSize -- determines the size of the buffer (limits number of bytes written),
                if not provided, will be GL_ACTIVE_ATTRIBUTE_MAX_LENGTH
     length -- pointer-to-GLsizei that will hold the resulting length of the name
     size -- pointer-to-GLint that will hold the size of the attribute
     type -- pointer-to-GLenum that will hold the type constant of the attribute
     name -- pointer-to-GLchar that will hold the (null-terminated) name string
-    
+
     returns (bytes) name, (int)size, (enum)type
     """
     if bufSize is None:
-        bufSize = int(glGetProgramiv( program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH))
+        bufSize = int(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH))
     if bufSize <= 0:
-        raise RuntimeError( 'Active attribute length reported', bufsize )
-    name,size,type = baseOperation( program, index, bufSize, *args )[1:]
-    if hasattr(name,'tostring'):
+        raise RuntimeError('Active attribute length reported', bufSize)
+    name, size, type = baseOperation(program, index, bufSize, *args)[1:]
+    if hasattr(name, 'tobytes'):
+        name = name.tobytes().rstrip(b'\000')
+    elif hasattr(name, 'tostring'):
         name = name.tostring().rstrip(b'\000')
-    elif hasattr(name,'value'):
+    elif hasattr(name, 'value'):
         name = name.value
-    return name,size,type
+    return name, size, type
 
 
-@_lazy( glGetUniformLocation )
-def glGetUniformLocation( baseOperation, program, name ):
+@_lazy(glGetUniformLocation)
+def glGetUniformLocation(baseOperation, program, name):
     """Check that name is a string with a null byte at the end of it"""
     if not name:
-        raise ValueError( """Non-null name required""" )
-    name = as_8_bit( name )
+        raise ValueError("""Non-null name required""")
+    name = as_8_bit(name)
     if name[-1] != _NULL_8_BYTE:
         name = name + _NULL_8_BYTE
-    return baseOperation( program, name )
-@_lazy( glGetAttribLocation )
-def glGetAttribLocation( baseOperation, program, name ):
+    return baseOperation(program, name)
+
+
+@_lazy(glGetAttribLocation)
+def glGetAttribLocation(baseOperation, program, name):
     """Check that name is a string with a null byte at the end of it"""
     if not name:
-        raise ValueError( """Non-null name required""" )
-    
-    name = as_8_bit( name )
+        raise ValueError("""Non-null name required""")
+
+    name = as_8_bit(name)
     if name[-1] != _NULL_8_BYTE:
         name = name + _NULL_8_BYTE
-    return baseOperation( program, name )
+    return baseOperation(program, name)
 
-@_lazy( glVertexAttribPointer )
+
+@_lazy(glVertexAttribPointer)
 def glVertexAttribPointer(
-    baseOperation, index, size, type,
-    normalized, stride, pointer,
+    baseOperation,
+    index,
+    size,
+    type,
+    normalized,
+    stride,
+    pointer,
 ):
     """Set an attribute pointer for a given shader (index)
 
@@ -435,12 +476,14 @@ def glVertexAttribPointer(
     in the contextdata structure in order to prevent null-
     reference errors in the renderer.
     """
-    array = arrays.ArrayDatatype.asArray( pointer, type )
-    key = ('vertex-attrib',index)
-    contextdata.setValue( key, array )
+    array = arrays.ArrayDatatype.asArray(pointer, type)
+    key = ('vertex-attrib', index)
+    contextdata.setValue(key, array)
     return baseOperation(
-        index, size, type,
-        normalized, stride,
-        arrays.ArrayDatatype.voidDataPointer( array )
+        index,
+        size,
+        type,
+        normalized,
+        stride,
+        arrays.ArrayDatatype.voidDataPointer(array),
     )
-

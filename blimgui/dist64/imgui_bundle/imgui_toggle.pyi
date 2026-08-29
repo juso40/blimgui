@@ -97,16 +97,18 @@ class ToggleConstants:
 # IMGUI_API bool Toggle(const char* label, bool* v, const ImVec2& size = ImVec2());    /* original C++ signature */
 @overload
 def toggle(label: str, v: bool, size: Optional[ImVec2Like] = None) -> Tuple[bool, bool]:
-    """Python bindings defaults:
-    If size is None, then its default value will be: ImVec2()
+    """---
+    Python bindings defaults:
+        If size is None, then its default value will be: ImVec2()
     """
     pass
 
 # IMGUI_API bool Toggle(const char* label, bool* v, ImGuiToggleFlags flags, const ImVec2& size = ImVec2());    /* original C++ signature */
 @overload
 def toggle(label: str, v: bool, flags: ToggleFlags, size: Optional[ImVec2Like] = None) -> Tuple[bool, bool]:
-    """Python bindings defaults:
-    If size is None, then its default value will be: ImVec2()
+    """---
+    Python bindings defaults:
+        If size is None, then its default value will be: ImVec2()
     """
     pass
 
@@ -115,8 +117,9 @@ def toggle(label: str, v: bool, flags: ToggleFlags, size: Optional[ImVec2Like] =
 def toggle(
     label: str, v: bool, flags: ToggleFlags, animation_duration: float, size: Optional[ImVec2Like] = None
 ) -> Tuple[bool, bool]:
-    """Python bindings defaults:
-    If size is None, then its default value will be: ImVec2()
+    """---
+    Python bindings defaults:
+        If size is None, then its default value will be: ImVec2()
     """
     pass
 
@@ -130,8 +133,9 @@ def toggle(
     knob_rounding: float,
     size: Optional[ImVec2Like] = None,
 ) -> Tuple[bool, bool]:
-    """Python bindings defaults:
-    If size is None, then its default value will be: ImVec2()
+    """---
+    Python bindings defaults:
+        If size is None, then its default value will be: ImVec2()
     """
     pass
 
@@ -146,8 +150,9 @@ def toggle(
     knob_rounding: float,
     size: Optional[ImVec2Like] = None,
 ) -> Tuple[bool, bool]:
-    """Python bindings defaults:
-    If size is None, then its default value will be: ImVec2()
+    """---
+    Python bindings defaults:
+        If size is None, then its default value will be: ImVec2()
     """
     pass
 

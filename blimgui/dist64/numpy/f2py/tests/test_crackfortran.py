@@ -1,15 +1,19 @@
-import importlib
-import time
-import pytest
-import numpy as np
-from numpy.f2py.crackfortran import markinnerspaces, nameargspattern
-from . import util
-from numpy.f2py import crackfortran
-import textwrap
 import contextlib
+import importlib
 import io
+import textwrap
+import time
+
+import pytest
+
+import numpy as np
+from numpy.f2py import crackfortran
+from numpy.f2py.crackfortran import markinnerspaces, nameargspattern
+
+from . import util
 
 
+@pytest.mark.slow
 class TestNoSpace(util.F2PyTest):
     # issue gh-15035: add handling for endsubroutine, endfunction with no space
     # between "end" and the block name
@@ -57,12 +61,12 @@ class TestPublicPrivate:
         assert set(tt['b_']['attrspec']) == {'public', 'bind(c)'}
         assert set(tt['c']['attrspec']) == {'public'}
 
-    def test_nowrap_private_proceedures(self, tmp_path):
+    def test_nowrap_private_procedures(self, tmp_path):
         fpath = util.getpath("tests", "src", "crackfortran", "gh23879.f90")
         mod = crackfortran.crackfortran([str(fpath)])
         assert len(mod) == 1
         pyf = crackfortran.crack2fortran(mod)
-        assert 'bar' not in pyf
+        assert 'bar1337baz' not in pyf
 
 class TestModuleProcedure:
     def test_moduleOperators(self, tmp_path):
@@ -93,6 +97,7 @@ class TestModuleProcedure:
         assert mod['vars']['seta']['attrspec'] == ['public', ]
 
 
+@pytest.mark.slow
 class TestExternal(util.F2PyTest):
     # issue gh-17859: add external attribute support
     sources = [util.getpath("tests", "src", "crackfortran", "gh17859.f")]
@@ -112,6 +117,7 @@ class TestExternal(util.F2PyTest):
         assert r == 123
 
 
+@pytest.mark.slow
 class TestCrackFortran(util.F2PyTest):
     # gh-2848: commented lines between parameters in subroutine parameter lists
     sources = [util.getpath("tests", "src", "crackfortran", "gh2848.f90"),
@@ -146,6 +152,7 @@ class TestMarkinnerspaces:
         assert markinnerspaces(r'a "b c" "d e"') == r'a "b@_@c" "d@_@e"'
 
 
+@pytest.mark.slow
 class TestDimSpec(util.F2PyTest):
     """This test suite tests various expressions that are used as dimension
     specifications.
@@ -215,7 +222,6 @@ class TestDimSpec(util.F2PyTest):
         )
 
     @pytest.mark.parametrize("dimspec", all_dimspecs)
-    @pytest.mark.slow
     def test_array_size(self, dimspec):
 
         count = self.all_dimspecs.index(dimspec)
@@ -257,16 +263,18 @@ class TestModuleDeclaration:
         assert mod[0]["vars"]["abar"]["="] == "bar('abar')"
 
 
+@pytest.mark.slow
 class TestEval(util.F2PyTest):
     def test_eval_scalar(self):
         eval_scalar = crackfortran._eval_scalar
 
         assert eval_scalar('123', {}) == '123'
         assert eval_scalar('12 + 3', {}) == '15'
-        assert eval_scalar('a + b', dict(a=1, b=2)) == '3'
+        assert eval_scalar('a + b', {"a": 1, "b": 2}) == '3'
         assert eval_scalar('"123"', {}) == "'123'"
 
 
+@pytest.mark.slow
 class TestFortranReader(util.F2PyTest):
     @pytest.mark.parametrize("encoding",
                              ['ascii', 'utf-8', 'utf-16', 'utf-32'])
@@ -330,15 +338,16 @@ class TestNameArgsPatternBacktracking:
             good_version_of_adversary = repeated_adversary + '@)@'
             assert nameargspattern.search(good_version_of_adversary)
 
+@pytest.mark.slow
 class TestFunctionReturn(util.F2PyTest):
     sources = [util.getpath("tests", "src", "crackfortran", "gh23598.f90")]
 
-    @pytest.mark.slow
     def test_function_rettype(self):
         # gh-23598
         assert self.module.intproduct(3, 4) == 12
 
 
+@pytest.mark.slow
 class TestFortranGroupCounters(util.F2PyTest):
     def test_end_if_comment(self):
         # gh-23533
@@ -360,9 +369,9 @@ class TestParamEval:
     # issue gh-11612, array parameter parsing
     def test_param_eval_nested(self):
         v = '(/3.14, 4./)'
-        g_params = dict(kind=crackfortran._kind_func,
-                selected_int_kind=crackfortran._selected_int_kind_func,
-                selected_real_kind=crackfortran._selected_real_kind_func)
+        g_params = {"kind": crackfortran._kind_func,
+                "selected_int_kind": crackfortran._selected_int_kind_func,
+                "selected_real_kind": crackfortran._selected_real_kind_func}
         params = {'dp': 8, 'intparamarray': {1: 3, 2: 5},
                   'nested': {1: 1, 2: 2, 3: 3}}
         dimspec = '(2)'
@@ -371,9 +380,9 @@ class TestParamEval:
 
     def test_param_eval_nonstandard_range(self):
         v = '(/ 6, 3, 1 /)'
-        g_params = dict(kind=crackfortran._kind_func,
-                selected_int_kind=crackfortran._selected_int_kind_func,
-                selected_real_kind=crackfortran._selected_real_kind_func)
+        g_params = {"kind": crackfortran._kind_func,
+                "selected_int_kind": crackfortran._selected_int_kind_func,
+                "selected_real_kind": crackfortran._selected_real_kind_func}
         params = {}
         dimspec = '(-1:1)'
         ret = crackfortran.param_eval(v, g_params, params, dimspec=dimspec)
@@ -381,9 +390,9 @@ class TestParamEval:
 
     def test_param_eval_empty_range(self):
         v = '6'
-        g_params = dict(kind=crackfortran._kind_func,
-                selected_int_kind=crackfortran._selected_int_kind_func,
-                selected_real_kind=crackfortran._selected_real_kind_func)
+        g_params = {"kind": crackfortran._kind_func,
+                "selected_int_kind": crackfortran._selected_int_kind_func,
+                "selected_real_kind": crackfortran._selected_real_kind_func}
         params = {}
         dimspec = ''
         pytest.raises(ValueError, crackfortran.param_eval, v, g_params, params,
@@ -391,18 +400,18 @@ class TestParamEval:
 
     def test_param_eval_non_array_param(self):
         v = '3.14_dp'
-        g_params = dict(kind=crackfortran._kind_func,
-                selected_int_kind=crackfortran._selected_int_kind_func,
-                selected_real_kind=crackfortran._selected_real_kind_func)
+        g_params = {"kind": crackfortran._kind_func,
+                "selected_int_kind": crackfortran._selected_int_kind_func,
+                "selected_real_kind": crackfortran._selected_real_kind_func}
         params = {}
         ret = crackfortran.param_eval(v, g_params, params, dimspec=None)
         assert ret == '3.14_dp'
 
     def test_param_eval_too_many_dims(self):
         v = 'reshape((/ (i, i=1, 250) /), (/5, 10, 5/))'
-        g_params = dict(kind=crackfortran._kind_func,
-                selected_int_kind=crackfortran._selected_int_kind_func,
-                selected_real_kind=crackfortran._selected_real_kind_func)
+        g_params = {"kind": crackfortran._kind_func,
+                "selected_int_kind": crackfortran._selected_int_kind_func,
+                "selected_real_kind": crackfortran._selected_real_kind_func}
         params = {}
         dimspec = '(0:4, 3:12, 5)'
         pytest.raises(ValueError, crackfortran.param_eval, v, g_params, params,

@@ -59,7 +59,6 @@ def main():
         glfw.poll_events()
         impl.process_inputs()
         imgui.new_frame()
-        imgui.show_demo_window()
 
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):
@@ -75,7 +74,7 @@ def main():
             imgui.end_main_menu_bar()
 
         if show_custom_window:
-            imgui.set_next_window_size((400, 600))
+            imgui.set_next_window_size((400, 400))
 
             is_expand, show_custom_window = imgui.begin("Custom window", True)
             if is_expand:

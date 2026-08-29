@@ -50,5 +50,7 @@ void *PyUFunc_API[] = {
         (void *) PyUFunc_AddLoopFromSpec,
         (void *) PyUFunc_AddPromoter,
         (void *) PyUFunc_AddWrappingLoop,
-        (void *) PyUFunc_GiveFloatingpointErrors
+        (void *) PyUFunc_GiveFloatingpointErrors,
+        (void *) PyUFunc_AddLoopsFromSpecs,
+        (void *) _PyUFuncObject_GET_ITEM_DATA
 };

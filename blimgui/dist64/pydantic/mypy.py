@@ -7,6 +7,8 @@ from collections.abc import Iterator
 from configparser import ConfigParser
 from typing import Any, Callable
 
+# To avoid import error (https://github.com/python/mypy/issues/17726):
+import mypy.types  # noqa: F401
 from mypy.errorcodes import ErrorCode
 from mypy.expandtype import expand_type, expand_type_by_instance
 from mypy.nodes import (
@@ -47,6 +49,7 @@ from mypy.options import Options
 from mypy.plugin import (
     CheckerPluginInterface,
     ClassDefContext,
+    DynamicClassDefContext,
     MethodContext,
     Plugin,
     ReportConfigContext,
@@ -82,6 +85,7 @@ from pydantic.version import parse_mypy_version
 CONFIGFILE_KEY = 'pydantic-mypy'
 METADATA_KEY = 'pydantic-mypy-metadata'
 BASEMODEL_FULLNAME = 'pydantic.main.BaseModel'
+CREATE_MODEL_FULLNAME = 'pydantic.main.create_model'
 BASESETTINGS_FULLNAME = 'pydantic_settings.main.BaseSettings'
 ROOT_MODEL_FULLNAME = 'pydantic.root_model.RootModel'
 MODEL_METACLASS_FULLNAME = 'pydantic._internal._model_construction.ModelMetaclass'
@@ -150,6 +154,12 @@ class PydanticPlugin(Plugin):
             return from_attributes_callback
         return None
 
+    def get_dynamic_class_hook(self, fullname: str) -> Callable[[DynamicClassDefContext], None] | None:
+        """Recognize `create_model()` calls as dynamic BaseModel subclasses."""
+        if fullname == CREATE_MODEL_FULLNAME:
+            return self._pydantic_create_model_callback
+        return None
+
     def report_config_data(self, ctx: ReportConfigContext) -> dict[str, Any]:
         """Return all plugin config data.
 
@@ -173,6 +183,33 @@ class PydanticPlugin(Plugin):
         assert info_metaclass, "callback not passed from 'get_metaclass_hook'"
         if getattr(info_metaclass.type, 'dataclass_transform_spec', None):
             info_metaclass.type.dataclass_transform_spec = None
+
+    def _pydantic_create_model_callback(self, ctx: DynamicClassDefContext) -> None:
+        """Make variables assigned from `create_model()` usable as types by mypy."""
+        # Determine the base class from __base__ argument if provided
+        base_fullname = BASEMODEL_FULLNAME
+        for arg_name, arg_expr in zip(ctx.call.arg_names, ctx.call.args):
+            if arg_name == '__base__' and isinstance(arg_expr, RefExpr) and arg_expr.node is not None:
+                if isinstance(arg_expr.node, TypeInfo):
+                    base_fullname = arg_expr.node.fullname
+                elif isinstance(arg_expr.node, Var) and isinstance(arg_expr.node.type, Instance):
+                    base_fullname = arg_expr.node.type.type.fullname
+
+        base_sym = ctx.api.lookup_fully_qualified_or_none(base_fullname)
+        if base_sym is None or not isinstance(base_sym.node, TypeInfo):
+            # Fall back to BaseModel
+            base_sym = ctx.api.lookup_fully_qualified_or_none(BASEMODEL_FULLNAME)
+            if base_sym is None or not isinstance(base_sym.node, TypeInfo):
+                return
+
+        base_info = base_sym.node
+        base_instance = fill_typevars(base_info)
+        assert isinstance(base_instance, Instance)
+
+        info = ctx.api.basic_new_typeinfo(ctx.name, base_instance, ctx.call.line)
+        info.metaclass_type = base_info.metaclass_type
+
+        ctx.api.add_symbol_table_node(ctx.name, SymbolTableNode(MDEF, info))
 
 
 class PydanticPluginConfig:
@@ -626,7 +663,7 @@ class PydanticModelTransformer:
                 found_fields[name] = field
 
                 sym_node = cls.info.names.get(name)
-                if sym_node and sym_node.node and not isinstance(sym_node.node, Var):
+                if sym_node and sym_node.node and not isinstance(sym_node.node, (Var, PlaceholderNode)):
                     self._api.fail(
                         'BaseModel field may only be overridden by another field',
                         sym_node.node,
@@ -884,10 +921,13 @@ class PydanticModelTransformer:
                         if arg_name is None or arg_name.startswith('__') or not arg_name.startswith('_'):
                             continue
                         analyzed_variable_type = self._api.anal_type(func_type.arg_types[arg_idx])
-                        if analyzed_variable_type is not None and arg_name == '_cli_settings_source':
-                            # _cli_settings_source is defined as CliSettingsSource[Any], and as such
+                        if analyzed_variable_type is not None and arg_name in (
+                            '_cli_settings_source',
+                            '_build_sources',
+                        ):
+                            # These arg names are annotated with types explicitly parameterized with `Any`, and as such
                             # the Any causes issues with --disallow-any-explicit. As a workaround, change
-                            # the Any type (as if CliSettingsSource was left unparameterized):
+                            # the Any type (as if the generic type was left unparameterized):
                             analyzed_variable_type = analyzed_variable_type.accept(
                                 ChangeExplicitTypeOfAny(TypeOfAny.from_omitted_generics)
                             )
@@ -955,15 +995,9 @@ class PydanticModelTransformer:
                 elif isinstance(var, PlaceholderNode) and not self._api.final_iteration:
                     # See https://github.com/pydantic/pydantic/issues/5191 to hit this branch for test coverage
                     self._api.defer()
-                else:  # pragma: no cover
-                    # I don't know whether it's possible to hit this branch, but I've added it for safety
-                    try:
-                        var_str = str(var)
-                    except TypeError:
-                        # This happens for PlaceholderNode; perhaps it will happen for other types in the future..
-                        var_str = repr(var)
-                    detail = f'sym_node.node: {var_str} (of type {var.__class__})'
-                    error_unexpected_behavior(detail, self._api, self._cls)
+                # `var` can also be a FuncDef or Decorator node (e.g. when overriding a field with a function or property).
+                # In that case, we don't want to do anything. Mypy will already raise an error that a field was not properly
+                # overridden.
             else:
                 var = field.to_var(info, api, use_alias=False)
                 var.info = info
@@ -1319,9 +1353,9 @@ def add_method(
         arg_names.append(arg.variable.name)
         arg_kinds.append(arg.kind)
 
-    signature = CallableType(arg_types, arg_kinds, arg_names, return_type, function_type)
-    if tvar_def:
-        signature.variables = [tvar_def]
+    signature = CallableType(
+        arg_types, arg_kinds, arg_names, return_type, function_type, variables=[tvar_def] if tvar_def else None
+    )
 
     func = FuncDef(name, args, Block([PassStmt()]))
     func.info = info
@@ -1373,7 +1407,7 @@ def parse_toml(config_file: str) -> dict[str, Any] | None:
         except ImportError:  # pragma: no cover
             import warnings
 
-            warnings.warn('No TOML parser installed, cannot read configuration from `pyproject.toml`.')
+            warnings.warn('No TOML parser installed, cannot read configuration from `pyproject.toml`.', stacklevel=2)
             return None
 
     with open(config_file, 'rb') as rf:

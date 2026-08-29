@@ -48,9 +48,11 @@ BIT2MODE = {
     32: ("RGB", "BGRX"),
 }
 
+USE_RAW_ALPHA = False
+
 
 def _accept(prefix: bytes) -> bool:
-    return prefix[:2] == b"BM"
+    return prefix.startswith(b"BM")
 
 
 def _dib_accept(prefix: bytes) -> bool:
@@ -74,6 +76,7 @@ class BmpImageFile(ImageFile.ImageFile):
 
     def _bitmap(self, header: int = 0, offset: int = 0) -> None:
         """Read relevant info about the BMP"""
+        assert self.fp is not None
         read, seek = self.fp.read, self.fp.seek
         if header:
             seek(header)
@@ -176,14 +179,12 @@ class BmpImageFile(ImageFile.ImageFile):
 
         # ------- If color count was not found in the header, compute from bits
         assert isinstance(file_info["bits"], int)
-        file_info["colors"] = (
-            file_info["colors"]
-            if file_info.get("colors", 0)
-            else (1 << file_info["bits"])
-        )
+        if not file_info.get("colors", 0):
+            file_info["colors"] = 1 << file_info["bits"]
+        assert isinstance(file_info["palette_padding"], int)
         assert isinstance(file_info["colors"], int)
         if offset == 14 + file_info["header_size"] and file_info["bits"] <= 8:
-            offset += 4 * file_info["colors"]
+            offset += file_info["palette_padding"] * file_info["colors"]
 
         # ---------------------- Check bit depth for unusual unsupported values
         self._mode, raw_mode = BIT2MODE.get(file_info["bits"], ("", ""))
@@ -242,7 +243,9 @@ class BmpImageFile(ImageFile.ImageFile):
                 msg = "Unsupported BMP bitfields layout"
                 raise OSError(msg)
         elif file_info["compression"] == self.COMPRESSIONS["RAW"]:
-            if file_info["bits"] == 32 and header == 22:  # 32-bit .cur offset
+            if file_info["bits"] == 32 and (
+                header == 22 or USE_RAW_ALPHA  # 32-bit .cur offset
+            ):
                 raw_mode, self._mode = "BGRA", "RGBA"
         elif file_info["compression"] in (
             self.COMPRESSIONS["RLE8"],
@@ -260,7 +263,6 @@ class BmpImageFile(ImageFile.ImageFile):
                 msg = f"Unsupported BMP Palette size ({file_info['colors']})"
                 raise OSError(msg)
             else:
-                assert isinstance(file_info["palette_padding"], int)
                 padding = file_info["palette_padding"]
                 palette = read(padding * file_info["colors"])
                 grayscale = True
@@ -307,6 +309,7 @@ class BmpImageFile(ImageFile.ImageFile):
     def _open(self) -> None:
         """Open file, check magic number and read header"""
         # read 14 bytes: magic number, filesize, reserved, header final offset
+        assert self.fp is not None
         head_data = self.fp.read(14)
         # choke if the file does not have the required magic bytes
         if not _accept(head_data):
@@ -321,7 +324,7 @@ class BmpImageFile(ImageFile.ImageFile):
 class BmpRleDecoder(ImageFile.PyDecoder):
     _pulls_fd = True
 
-    def decode(self, buffer: bytes | Image.SupportsArrayInterface) -> tuple[int, int]:
+    def decode(self, buffer: Image.DecoderInput) -> tuple[int, int]:
         assert self.fd is not None
         rle4 = self.args[1]
         data = bytearray()
@@ -363,7 +366,7 @@ class BmpRleDecoder(ImageFile.PyDecoder):
                     bytes_read = self.fd.read(2)
                     if len(bytes_read) < 2:
                         break
-                    right, up = self.fd.read(2)
+                    right, up = bytes_read
                     data += b"\x00" * (right + up * self.state.xsize)
                     x = len(data) % self.state.xsize
                 else:
@@ -441,9 +444,9 @@ def _save(
     image = stride * im.size[1]
 
     if im.mode == "1":
-        palette = b"".join(o8(i) * 4 for i in (0, 255))
+        palette = b"".join(o8(i) * 3 + b"\x00" for i in (0, 255))
     elif im.mode == "L":
-        palette = b"".join(o8(i) * 4 for i in range(256))
+        palette = b"".join(o8(i) * 3 + b"\x00" for i in range(256))
     elif im.mode == "P":
         palette = im.im.getpalette("RGB", "BGRX")
         colors = len(palette) // 4

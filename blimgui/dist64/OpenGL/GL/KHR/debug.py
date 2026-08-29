@@ -196,6 +196,8 @@ glGetDebugMessageLogKHR=wrapper.wrapper(glGetDebugMessageLogKHR).setInputArraySi
 # INPUT glGetObjectLabelKHR.label size not checked against bufSize
 glGetObjectLabelKHR=wrapper.wrapper(glGetObjectLabelKHR).setInputArraySize(
     'label', None
+).setInputArraySize(
+    'length', 1
 )
 # INPUT glGetObjectPtrLabelKHR.label size not checked against bufSize
 glGetObjectPtrLabelKHR=wrapper.wrapper(glGetObjectPtrLabelKHR).setInputArraySize(

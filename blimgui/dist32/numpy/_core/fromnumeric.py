@@ -2,18 +2,15 @@
 
 """
 import functools
+import math
 import types
-import warnings
 
 import numpy as np
-from .._utils import set_module
-from . import multiarray as mu
-from . import overrides
-from . import umath as um
-from . import numerictypes as nt
-from .multiarray import asarray, array, asanyarray, concatenate
+from numpy._utils import set_module
+
+from . import _methods, multiarray as mu, numerictypes as nt, overrides, umath as um
 from ._multiarray_umath import _array_converter
-from . import _methods
+from .multiarray import asanyarray, asarray, concatenate
 
 _dt_ = nt.sctype2char
 
@@ -172,7 +169,7 @@ def take(a, indices, axis=None, out=None, mode='raise'):
 
         Ni, Nk = a.shape[:axis], a.shape[axis+1:]
         for ii in ndindex(Ni):
-            for kk in ndindex(Nj):
+            for kk in ndindex(Nk):
                 out[ii + s_[...,] + kk] = a[ii + s_[:,] + kk][indices]
 
     For this reason, it is equivalent to (but faster than) the following use
@@ -203,15 +200,14 @@ def take(a, indices, axis=None, out=None, mode='raise'):
     return _wrapfunc(a, 'take', indices, axis=axis, out=out, mode=mode)
 
 
-def _reshape_dispatcher(a, /, shape=None, order=None, *, newshape=None,
-                        copy=None):
+def _reshape_dispatcher(a, /, shape, order=None, *, copy=None):
     return (a,)
 
 
 @array_function_dispatch(_reshape_dispatcher)
-def reshape(a, /, shape=None, order='C', *, newshape=None, copy=None):
+def reshape(a, /, shape, order='C', *, copy=None):
     """
-    Gives a new shape to an array without changing its data.
+    Returns a reshaped ndarray without changing data.
 
     Parameters
     ----------
@@ -235,10 +231,6 @@ def reshape(a, /, shape=None, order='C', *, newshape=None, copy=None):
         'A' means to read / write the elements in Fortran-like index
         order if ``a`` is Fortran *contiguous* in memory, C-like order
         otherwise.
-    newshape : int or tuple of ints
-        .. deprecated:: 2.1
-            Replaced by ``shape`` argument. Retained for backward
-            compatibility.
     copy : bool, optional
         If ``True``, then the array data is copied. If ``None``, a copy will
         only be made if it's required by ``order``. For ``False`` it raises
@@ -302,23 +294,6 @@ def reshape(a, /, shape=None, order='C', *, newshape=None, copy=None):
            [3, 4],
            [5, 6]])
     """
-    if newshape is None and shape is None:
-        raise TypeError(
-            "reshape() missing 1 required positional argument: 'shape'")
-    if newshape is not None:
-        if shape is not None:
-            raise TypeError(
-                "You cannot specify 'newshape' and 'shape' arguments "
-                "at the same time.")
-        # Deprecated in NumPy 2.1, 2024-04-18
-        warnings.warn(
-            "`newshape` keyword argument is deprecated, "
-            "use `shape=...` or pass shape positionally instead. "
-            "(deprecated in NumPy 2.1)",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        shape = newshape
     if copy is not None:
         return _wrapfunc(a, 'reshape', shape, order=order, copy=copy)
     return _wrapfunc(a, 'reshape', shape, order=order)
@@ -565,8 +540,7 @@ def put(a, ind, v, mode='raise'):
     try:
         put = a.put
     except AttributeError as e:
-        raise TypeError("argument 1 must be numpy.ndarray, "
-                        "not {name}".format(name=type(a).__name__)) from e
+        raise TypeError(f"argument 1 must be numpy.ndarray, not {type(a)}") from e
 
     return put(ind, v, mode=mode)
 
@@ -780,8 +754,6 @@ def partition(a, kth, axis=-1, kind='introselect', order=None):
         provided with a sequence of k-th it will partition all elements
         indexed by k-th  of them into their sorted position at once.
 
-        .. deprecated:: 1.22.0
-            Passing booleans as index is deprecated.
     axis : int or None, optional
         Axis along which to sort. If None, the array is flattened before
         sorting. The default is -1, which sorts along the last axis.
@@ -893,8 +865,6 @@ def argpartition(a, kth, axis=-1, kind='introselect', order=None):
         sequence of k-th it will partition all of them into their sorted
         position at once.
 
-        .. deprecated:: 1.22.0
-            Passing booleans as index is deprecated.
     axis : int or None, optional
         Axis along which to sort. The default is -1 (the last axis). If
         None, the flattened array is used.
@@ -962,12 +932,14 @@ def argpartition(a, kth, axis=-1, kind='introselect', order=None):
     return _wrapfunc(a, 'argpartition', kth, axis=axis, kind=kind, order=order)
 
 
-def _sort_dispatcher(a, axis=None, kind=None, order=None, *, stable=None):
+def _sort_dispatcher(
+    a, axis=None, kind=None, order=None, *, stable=None, descending=None
+):
     return (a,)
 
 
 @array_function_dispatch(_sort_dispatcher)
-def sort(a, axis=-1, kind=None, order=None, *, stable=None):
+def sort(a, axis=-1, kind=None, order=None, *, stable=None, descending=np._NoValue):
     """
     Return a sorted copy of an array.
 
@@ -996,6 +968,13 @@ def sort(a, axis=-1, kind=None, order=None, *, stable=None):
         this option selects ``kind='stable'``. Default: ``None``.
 
         .. versionadded:: 2.0.0
+    descending : bool, optional
+        Sort order. If ``True``, the returned array will be sorted in
+        descending order. If ``False`` or ``None``, the returned array will
+        be sorted in ascending order. Values that are NaN are sorted to the
+        end for both orders. Default: ``None``.
+
+        .. versionadded:: 2.5.0
 
     Returns
     -------
@@ -1119,16 +1098,22 @@ def sort(a, axis=-1, kind=None, order=None, *, stable=None):
         axis = -1
     else:
         a = asanyarray(a).copy(order="K")
-    a.sort(axis=axis, kind=kind, order=order, stable=stable)
+    # Sanitize for backward-compatibility
+    if descending is not np._NoValue:
+        a.sort(axis=axis, kind=kind, order=order, stable=stable, descending=descending)
+    else:
+        a.sort(axis=axis, kind=kind, order=order, stable=stable)
     return a
 
 
-def _argsort_dispatcher(a, axis=None, kind=None, order=None, *, stable=None):
+def _argsort_dispatcher(
+    a, axis=None, kind=None, order=None, *, stable=None, descending=None
+):
     return (a,)
 
 
 @array_function_dispatch(_argsort_dispatcher)
-def argsort(a, axis=-1, kind=None, order=None, *, stable=None):
+def argsort(a, axis=-1, kind=None, order=None, *, stable=None, descending=np._NoValue):
     """
     Returns the indices that would sort an array.
 
@@ -1161,6 +1146,13 @@ def argsort(a, axis=-1, kind=None, order=None, *, stable=None):
         this option selects ``kind='stable'``. Default: ``None``.
 
         .. versionadded:: 2.0.0
+    descending : bool, optional
+        Sort order. If ``True``, the returned array will be sorted in
+        descending order. If ``False`` or ``None``, the returned array will
+        be sorted in ascending order. Values that are NaN are sorted to the
+        end for both orders. Default: ``None``.
+
+        .. versionadded:: 2.5.0
 
     Returns
     -------
@@ -1218,7 +1210,7 @@ def argsort(a, axis=-1, kind=None, order=None, *, stable=None):
     array([[0, 3],
            [2, 2]])
 
-    Indices of the sorted elements of a N-dimensional array:
+    Indices of the sorted elements of an N-dimensional array:
 
     >>> ind = np.unravel_index(np.argsort(x, axis=None), x.shape)
     >>> ind
@@ -1240,8 +1232,24 @@ def argsort(a, axis=-1, kind=None, order=None, *, stable=None):
     array([0, 1])
 
     """
+    # Sanitize for backward-compatibility
+    if descending is not np._NoValue:
+        return _wrapfunc(
+            a,
+            "argsort",
+            axis=axis,
+            kind=kind,
+            order=order,
+            stable=stable,
+            descending=descending,
+        )
     return _wrapfunc(
-        a, 'argsort', axis=axis, kind=kind, order=order, stable=stable
+        a,
+        "argsort",
+        axis=axis,
+        kind=kind,
+        order=order,
+        stable=stable,
     )
 
 def _argmax_dispatcher(a, axis=None, out=None, *, keepdims=np._NoValue):
@@ -1305,8 +1313,10 @@ def argmax(a, axis=None, out=None, *, keepdims=np._NoValue):
     >>> np.argmax(a, axis=1)
     array([2, 2])
 
-    Indexes of the maximal elements of a N-dimensional array:
+    Indexes of the maximal elements of an N-dimensional array:
 
+    >>> a.flat[np.argmax(a)]
+    15
     >>> ind = np.unravel_index(np.argmax(a, axis=None), a.shape)
     >>> ind
     (1, 2)
@@ -1403,8 +1413,10 @@ def argmin(a, axis=None, out=None, *, keepdims=np._NoValue):
     >>> np.argmin(a, axis=1)
     array([0, 0])
 
-    Indices of the minimum elements of a N-dimensional array:
+    Indices of the minimum elements of an N-dimensional array:
 
+    >>> a.flat[np.argmin(a)]
+    10
     >>> ind = np.unravel_index(np.argmin(a, axis=None), a.shape)
     >>> ind
     (0, 0)
@@ -1608,7 +1620,8 @@ def resize(a, new_shape):
         # First case must zero fill. The second would have repeats == 0.
         return np.zeros_like(a, shape=new_shape)
 
-    repeats = -(-new_size // a.size)  # ceil division
+    # ceiling division without negating new_size
+    repeats = (new_size + a.size - 1) // a.size
     a = concatenate((a,) * repeats)[:new_size]
 
     return reshape(a, new_shape)
@@ -2028,15 +2041,6 @@ def nonzero(a):
     To group the indices by element, rather than dimension, use `argwhere`,
     which returns a row for each non-zero element.
 
-    .. note::
-
-       When called on a zero-d array or scalar, ``nonzero(a)`` is treated
-       as ``nonzero(atleast_1d(a))``.
-
-       .. deprecated:: 1.17.0
-
-          Use `atleast_1d` explicitly if this behavior is deliberate.
-
     Parameters
     ----------
     a : array_like
@@ -2060,7 +2064,7 @@ def nonzero(a):
     Notes
     -----
     While the nonzero values can be obtained with ``a[nonzero(a)]``, it is
-    recommended to use ``x[x.astype(bool)]`` or ``x[x != 0]`` instead, which
+    recommended to use ``x[x.astype(np.bool)]`` or ``x[x != 0]`` instead, which
     will correctly handle 0-d arrays.
 
     Examples
@@ -2419,7 +2423,7 @@ def sum(a, axis=None, dtype=None, out=None, keepdims=np._NoValue,
     more precise approach to summation.
     Especially when summing a large number of lower precision floating point
     numbers, such as ``float32``, numerical errors can become significant.
-    In such cases it can be advisable to use `dtype="float64"` to use a higher
+    In such cases it can be advisable to use `dtype=np.float64` to use a higher
     precision for the output.
 
     Examples
@@ -2450,18 +2454,11 @@ def sum(a, axis=None, dtype=None, out=None, keepdims=np._NoValue,
     """
     if isinstance(a, _gentype):
         # 2018-02-25, 1.15.0
-        warnings.warn(
-            "Calling np.sum(generator) is deprecated, and in the future will "
-            "give a different result. Use np.sum(np.fromiter(generator)) or "
+        raise TypeError(
+            "Calling np.sum(generator) is deprecated."
+            "Use np.sum(np.fromiter(generator)) or "
             "the python sum builtin instead.",
-            DeprecationWarning, stacklevel=2
         )
-
-        res = _sum_(a)
-        if out is not None:
-            out[...] = res
-            return out
-        return res
 
     return _wrapreduction(
         a, np.add, 'sum', axis, dtype, out,
@@ -2762,7 +2759,7 @@ def cumulative_prod(x, /, *, axis=None, dtype=None, out=None,
     ...                        # total product 1*2*3 = 6
     array([1, 2, 6])
     >>> a = np.array([1, 2, 3, 4, 5, 6])
-    >>> np.cumulative_prod(a, dtype=float) # specify type of output
+    >>> np.cumulative_prod(a, dtype=np.float64)  # specify type of output
     array([   1.,    2.,    6.,   24.,  120.,  720.])
 
     The cumulative product for each column (i.e., over the rows) of ``b``:
@@ -2849,7 +2846,7 @@ def cumulative_sum(x, /, *, axis=None, dtype=None, out=None,
     array([1, 2, 3, 4, 5, 6])
     >>> np.cumulative_sum(a)
     array([ 1,  3,  6, 10, 15, 21])
-    >>> np.cumulative_sum(a, dtype=float)  # specifies type of output value(s)
+    >>> np.cumulative_sum(a, dtype=np.float64)  # specifies type of output value(s)
     array([  1.,   3.,   6.,  10.,  15.,  21.])
 
     >>> b = np.array([[1, 2, 3], [4, 5, 6]])
@@ -2933,7 +2930,7 @@ def cumsum(a, axis=None, dtype=None, out=None):
            [4, 5, 6]])
     >>> np.cumsum(a)
     array([ 1,  3,  6, 10, 15, 21])
-    >>> np.cumsum(a, dtype=float)     # specifies type of output value(s)
+    >>> np.cumsum(a, dtype=np.float64)  # specifies type of output value(s)
     array([  1.,   3.,   6.,  10.,  15.,  21.])
 
     >>> np.cumsum(a,axis=0)      # sum over rows for each of the 3 columns
@@ -3099,7 +3096,7 @@ def max(a, axis=None, out=None, keepdims=np._NoValue, initial=np._NoValue,
 
     See Also
     --------
-    amin :
+    min :
         The minimum value of an array along a given axis, propagating any NaNs.
     nanmax :
         The maximum value of an array along a given axis, ignoring any NaNs.
@@ -3137,7 +3134,7 @@ def max(a, axis=None, out=None, keepdims=np._NoValue, initial=np._NoValue,
     array([1, 3])
     >>> np.max(a, where=[False, True], initial=-1, axis=0)
     array([-1,  3])
-    >>> b = np.arange(5, dtype=float)
+    >>> b = np.arange(5, dtype=np.float64)
     >>> b[2] = np.nan
     >>> np.max(b)
     np.float64(nan)
@@ -3237,7 +3234,7 @@ def min(a, axis=None, out=None, keepdims=np._NoValue, initial=np._NoValue,
 
     See Also
     --------
-    amax :
+    max :
         The maximum value of an array along a given axis, propagating any NaNs.
     nanmin :
         The minimum value of an array along a given axis, ignoring any NaNs.
@@ -3276,7 +3273,7 @@ def min(a, axis=None, out=None, keepdims=np._NoValue, initial=np._NoValue,
     >>> np.min(a, where=[False, True], initial=10, axis=0)
     array([10,  1])
 
-    >>> b = np.arange(5, dtype=float)
+    >>> b = np.arange(5, dtype=np.float64)
     >>> b[2] = np.nan
     >>> np.min(b)
     np.float64(nan)
@@ -3497,7 +3494,7 @@ def cumprod(a, axis=None, dtype=None, out=None):
     ...               # total product 1*2*3 = 6
     array([1, 2, 6])
     >>> a = np.array([[1, 2, 3], [4, 5, 6]])
-    >>> np.cumprod(a, dtype=float) # specify type of output
+    >>> np.cumprod(a, dtype=np.float64)  # specify type of output
     array([   1.,    2.,    6.,   24.,  120.,  720.])
 
     The cumulative product for each column (i.e., over the rows) of `a`:
@@ -3572,9 +3569,12 @@ def size(a, axis=None):
     ----------
     a : array_like
         Input data.
-    axis : int, optional
-        Axis along which the elements are counted.  By default, give
+    axis : None or int or tuple of ints, optional
+        Axis or axes along which the elements are counted.  By default, give
         the total number of elements.
+
+        .. versionchanged:: 2.4
+           Extended to accept multiple axes.
 
     Returns
     -------
@@ -3593,10 +3593,12 @@ def size(a, axis=None):
     >>> a = np.array([[1,2,3],[4,5,6]])
     >>> np.size(a)
     6
-    >>> np.size(a,1)
+    >>> np.size(a,axis=1)
     3
-    >>> np.size(a,0)
+    >>> np.size(a,axis=0)
     2
+    >>> np.size(a,axis=(0,1))
+    6
 
     """
     if axis is None:
@@ -3605,10 +3607,10 @@ def size(a, axis=None):
         except AttributeError:
             return asarray(a).size
     else:
-        try:
-            return a.shape[axis]
-        except AttributeError:
-            return asarray(a).shape[axis]
+        _shape = shape(a)
+        from .numeric import normalize_axis_tuple
+        axis = normalize_axis_tuple(axis, len(_shape), allow_duplicate=False)
+        return math.prod(_shape[ax] for ax in axis)
 
 
 def _round_dispatcher(a, decimals=None, out=None):

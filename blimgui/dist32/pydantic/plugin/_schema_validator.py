@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import functools
-from typing import TYPE_CHECKING, Any, Callable, Iterable, TypeVar
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Callable, Literal, TypeVar
 
 from pydantic_core import CoreConfig, CoreSchema, SchemaValidator, ValidationError
-from typing_extensions import Literal, ParamSpec
+from typing_extensions import ParamSpec
 
 if TYPE_CHECKING:
     from . import BaseValidateHandlerProtocol, PydanticPluginProtocol, SchemaKind, SchemaTypePath
@@ -26,6 +27,7 @@ def create_schema_validator(
     schema_kind: SchemaKind,
     config: CoreConfig | None = None,
     plugin_settings: dict[str, Any] | None = None,
+    _use_prebuilt: bool = True,
 ) -> SchemaValidator | PluggableSchemaValidator:
     """Create a `SchemaValidator` or `PluggableSchemaValidator` if plugins are installed.
 
@@ -45,9 +47,10 @@ def create_schema_validator(
             config,
             plugins,
             plugin_settings or {},
+            _use_prebuilt=_use_prebuilt,
         )
     else:
-        return SchemaValidator(schema, config)
+        return SchemaValidator(schema, config, _use_prebuilt=_use_prebuilt)
 
 
 class PluggableSchemaValidator:
@@ -64,8 +67,9 @@ class PluggableSchemaValidator:
         config: CoreConfig | None,
         plugins: Iterable[PydanticPluginProtocol],
         plugin_settings: dict[str, Any],
+        _use_prebuilt: bool = True,
     ) -> None:
-        self._schema_validator = SchemaValidator(schema, config)
+        self._schema_validator = SchemaValidator(schema, config, _use_prebuilt=_use_prebuilt)
 
         python_event_handlers: list[BaseValidateHandlerProtocol] = []
         json_event_handlers: list[BaseValidateHandlerProtocol] = []
@@ -87,6 +91,15 @@ class PluggableSchemaValidator:
         self.validate_python = build_wrapper(self._schema_validator.validate_python, python_event_handlers)
         self.validate_json = build_wrapper(self._schema_validator.validate_json, json_event_handlers)
         self.validate_strings = build_wrapper(self._schema_validator.validate_strings, strings_event_handlers)
+
+    # Used to allow reuse of validators in pydantic-core (see pydantic-core/src/validators/prebuilt.rs):
+    @property
+    def __pydantic_schema_validator__(self) -> SchemaValidator:
+        """The underlying pydantic-core `SchemaValidator`.
+
+        This is a private attribute, not meant to be used outside Pydantic.
+        """
+        return self._schema_validator
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._schema_validator, name)
@@ -125,7 +138,7 @@ def build_wrapper(func: Callable[P, R], event_handlers: list[BaseValidateHandler
 
 
 def filter_handlers(handler_cls: BaseValidateHandlerProtocol, method_name: str) -> bool:
-    """Filter out handler methods which are not implemented by the plugin directly - e.g. are missing
+    """Filter out handler methods which are not implemented by the plugin directly - e.g. those that are missing
     or are inherited from the protocol.
     """
     handler = getattr(handler_cls, method_name, None)

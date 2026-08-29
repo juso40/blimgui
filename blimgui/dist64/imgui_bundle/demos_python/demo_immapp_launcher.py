@@ -82,22 +82,12 @@ def make_gui() -> GuiFunction:
         ),
         DemoApp(
             "example_python_backend_sdl2",
-            "Python: how to use ImGui with SDL2 using a *full python* backend",
-            is_python_backend_demo=True,
-        ),
-        DemoApp(
-            "example_python_backend_sdl3",
-            "Python: how to use ImGui with SDL3 using a *full python* backend",
+            "Python: how to use ImGui with SDL using a *full python* backend",
             is_python_backend_demo=True,
         ),
         DemoApp(
             "example_python_backend_pyglet",
             "Python: how to use ImGui with pyglet using a *full python* backend",
-            is_python_backend_demo=True,
-        ),
-        DemoApp(
-            "example_python_backend_wgpu",
-            "Python: how to use ImGui with wgpu (WebGPU for Python)",
             is_python_backend_demo=True,
         ),
     ]

@@ -1,4 +1,5 @@
 """GLX (x-windows)-specific platform features"""
+
 import ctypes, ctypes.util
 from OpenGL.platform import baseplatform, ctypesloader
 
@@ -11,22 +12,16 @@ class GLXPlatform(baseplatform.BasePlatform):
     # references to GL/GLU functions).
     @baseplatform.lazy_property
     def GL(self):
-        try:
-            for name in ('OpenGL', 'GL'):
+        for name in ('OpenGL', 'GL'):
+            try:
                 lib = ctypesloader.loadLibrary(
                     ctypes.cdll, name, mode=ctypes.RTLD_GLOBAL
                 )
-                if lib:
-                    return lib
-            raise ImportError("Unable to find an OpenGL or GL library")
-        except OSError as err:
-            try:
-                # libGL was the original name, older devices likely still need it...
-                return ctypesloader.loadLibrary(
-                    ctypes.cdll, "GL", mode=ctypes.RTLD_GLOBAL
-                )
             except OSError as err:
-                raise ImportError("Unable to load OpenGL library", *err.args)
+                lib = None
+            if lib:
+                return lib
+        raise ImportError("Unable to load OpenGL or GL library")
 
     @baseplatform.lazy_property
     def GLU(self):
@@ -106,7 +101,9 @@ class GLXPlatform(baseplatform.BasePlatform):
     # really kosher...
     @baseplatform.lazy_property
     def GetCurrentContext(self):
-        return self.GLX.glXGetCurrentContext
+        glXGetCurrentContext = self.GLX.glXGetCurrentContext
+        glXGetCurrentContext.restype = ctypes.c_void_p
+        return glXGetCurrentContext
 
     def getGLUTFontPointer(self, constant):
         """Platform specific function to retrieve a GLUT font pointer

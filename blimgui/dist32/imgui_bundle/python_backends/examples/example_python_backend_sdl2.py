@@ -42,8 +42,6 @@ def main():
 
         imgui.new_frame()
 
-        imgui.show_demo_window()
-
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):
 

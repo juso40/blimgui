@@ -19,15 +19,19 @@ from __future__ import annotations
 import abc
 import functools
 from collections.abc import Sequence
-from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, cast
+from typing import cast
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    from types import ModuleType
+    from typing import Any
+
     from . import _imaging
     from ._typing import NumpyArray
 
 
-class Filter:
+class Filter(abc.ABC):
     @abc.abstractmethod
     def filter(self, image: _imaging.ImagingCore) -> _imaging.ImagingCore:
         pass
@@ -38,6 +42,7 @@ class MultibandFilter(Filter):
 
 
 class BuiltinFilter(MultibandFilter):
+    name: str
     filterargs: tuple[Any, ...]
 
     def filter(self, image: _imaging.ImagingCore) -> _imaging.ImagingCore:
@@ -95,6 +100,15 @@ class RankFilter(Filter):
     name = "Rank"
 
     def __init__(self, size: int, rank: int) -> None:
+        if size % 2 == 0:
+            msg = "bad filter size"
+            raise ValueError(msg)
+        if size * size * 4 > (2**31 - 1):
+            msg = "filter size too large"
+            raise ValueError(msg)
+        if rank < 0 or rank >= size * size:
+            msg = "bad rank value"
+            raise ValueError(msg)
         self.size = size
         self.rank = rank
 
@@ -102,7 +116,7 @@ class RankFilter(Filter):
         if image.mode == "P":
             msg = "cannot filter palette images"
             raise ValueError(msg)
-        image = image.expand(self.size // 2, self.size // 2)
+        image = image.expand(self.size // 2)
         return image.rankfilter(self.size, self.rank)
 
 
@@ -117,8 +131,8 @@ class MedianFilter(RankFilter):
     name = "Median"
 
     def __init__(self, size: int = 3) -> None:
-        self.size = size
-        self.rank = size * size // 2
+        rank = size * size // 2
+        super().__init__(size, rank)
 
 
 class MinFilter(RankFilter):
@@ -132,8 +146,8 @@ class MinFilter(RankFilter):
     name = "Min"
 
     def __init__(self, size: int = 3) -> None:
-        self.size = size
-        self.rank = 0
+        rank = 0
+        super().__init__(size, rank)
 
 
 class MaxFilter(RankFilter):
@@ -147,8 +161,8 @@ class MaxFilter(RankFilter):
     name = "Max"
 
     def __init__(self, size: int = 3) -> None:
-        self.size = size
-        self.rank = size * size - 1
+        rank = size * size - 1
+        super().__init__(size, rank)
 
 
 class ModeFilter(Filter):
@@ -185,10 +199,10 @@ class GaussianBlur(MultibandFilter):
 
     def filter(self, image: _imaging.ImagingCore) -> _imaging.ImagingCore:
         xy = self.radius
+        if xy == (0, 0) or xy == 0:
+            return image.copy()
         if isinstance(xy, (int, float)):
             xy = (xy, xy)
-        if xy == (0, 0):
-            return image.copy()
         return image.gaussian_blur(xy)
 
 
@@ -217,10 +231,10 @@ class BoxBlur(MultibandFilter):
 
     def filter(self, image: _imaging.ImagingCore) -> _imaging.ImagingCore:
         xy = self.radius
+        if xy == (0, 0) or xy == 0:
+            return image.copy()
         if isinstance(xy, (int, float)):
             xy = (xy, xy)
-        if xy == (0, 0):
-            return image.copy()
         return image.box_blur(xy)
 
 
@@ -598,8 +612,6 @@ class Color3DLUT(MultibandFilter):
             self.mode or image.mode,
             Image.Resampling.BILINEAR,
             self.channels,
-            self.size[0],
-            self.size[1],
-            self.size[2],
+            self.size,
             self.table,
         )

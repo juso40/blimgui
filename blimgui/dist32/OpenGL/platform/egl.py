@@ -73,7 +73,8 @@ class EGLPlatform( baseplatform.BasePlatform ):
         #   https://github.com/raspberrypi/firmware/issues/110
         import os
         if os.path.exists('/proc/cpuinfo'):
-            info = open('/proc/cpuinfo').read()
+            with open('/proc/cpuinfo', 'r') as f:
+                info = f.read()
             if 'BCM2708' in info or 'BCM2709' in info:
                 assert self.GLES2
         try:
@@ -103,7 +104,9 @@ class EGLPlatform( baseplatform.BasePlatform ):
     DEFAULT_FUNCTION_TYPE = staticmethod( ctypes.CFUNCTYPE )
     @baseplatform.lazy_property
     def GetCurrentContext( self ):
-        return self.EGL.eglGetCurrentContext
+        eglGetCurrentContext = self.EGL.eglGetCurrentContext
+        eglGetCurrentContext.restype = ctypes.c_void_p
+        return eglGetCurrentContext
 
     def getGLUTFontPointer( self, constant ):
         """Platform specific function to retrieve a GLUT font pointer
@@ -120,3 +123,12 @@ class EGLPlatform( baseplatform.BasePlatform ):
         internal = 'glut' + "".join( [x.title() for x in name] )
         pointer = ctypes.c_void_p.in_dll( self.GLUT, internal )
         return ctypes.c_void_p(ctypes.addressof(pointer))
+
+    def install(self, namespace):
+        """Work around SDL not recognising wayland as platform by default"""
+        result = super(EGLPlatform,self).install(namespace)
+        import os
+        if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+            if not os.environ.get('SDL_VIDEODRIVER'):
+                os.environ['SDL_VIDEODRIVER'] = 'wayland'
+        return result

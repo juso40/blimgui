@@ -301,6 +301,7 @@ FormatHandler(
         "_ctypes.PyCArrayType",
         "_ctypes.Array",
         "_ctypes.array.Array",
+        "_ctypes.array.ArrayMeta",
     ],
     isOutput=True,
 )
@@ -308,7 +309,7 @@ FormatHandler(
     "ctypesparameter",
     "OpenGL.arrays.ctypesparameters.CtypesParameterHandler",
     [
-        _bi + ".CArgObject",
+        ("_ctypes" if sys.version_info[:2] >= (3,12) else _bi) + ".CArgObject",
         "ctypes.c_uint",
         "ctypes.c_int",
         "ctypes.c_float",

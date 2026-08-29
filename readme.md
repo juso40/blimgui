@@ -127,3 +127,50 @@ Creating a custom theme is all about defining style properties in a simple text 
 
 ### 💖 Theme Contributions
 Created an awesome theme? Share it! Submit a `.txt` file via a Pull Request to the [`themes`](./themes) folder on GitHub.
+
+## Contributing
+You can add this repo to your `unrealsdk.user.toml`:
+```toml
+[mod_manager]
+extra_folders = [
+    "<path>\\blimgui"
+]
+```
+
+### Installing/updating native modules
+On Windows, repeating for both a 32-bit and 64-bit install:
+```ps1
+$bit = 64
+python -m venv .venv-$bit
+&".\.venv-$bit\Scripts\Activate.ps1"
+pip install imgui-bundle[opengl,glfw,pyglet,pydantic] numpy pillow
+rm -Recurse blimgui/dist$bit
+cp -Recurse .venv-$bit/Lib/site-packages blimgui/dist$bit
+rm -Recurse blimgui/dist$bit/pip*
+rm blimgui/dist$bit/**/.gitignore
+```
+
+32-bit versions may require a local C compiler installed.
+
+#### Installing 1.6.2 - same as old version
+Thanks to a bad build dependency, if we want to use the same version, but on newer Python, we have
+to build them manually from source. Clone`git@github.com:pthom/imgui_bundle.git` and checkout
+`v1.6.2`. Then at the top of `pyproject.toml`, add a version dependency to nanobind:
+
+```diff
+diff --git i/pyproject.toml w/pyproject.toml
+index 3cbe6ab1..f32f54eb 100644
+--- i/pyproject.toml
++++ w/pyproject.toml
+@@ -1,5 +1,5 @@
+ [build-system]
+-requires = ["scikit-build-core>=0.9.1", "nanobind"]
++requires = ["scikit-build-core>=0.9.1", "nanobind<3.0"]
+ build-backend = "scikit_build_core.build"
+ 
+ # To debug build backend, replace by:
+```
+
+This old version of imgui_bundle requires an older nanobind. With this, you should be able to just
+run `pip install -v .` (which also contains the other libraries), and which will slowly compile the
+module from source.

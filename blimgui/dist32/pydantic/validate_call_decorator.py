@@ -25,8 +25,8 @@ def _check_function_type(function: object) -> None:
     """Check if the input function is a supported type for `validate_call`."""
     if isinstance(function, _generate_schema.VALIDATE_CALL_SUPPORTED_TYPES):
         try:
-            inspect.signature(cast(_generate_schema.ValidateCallSupportedTypes, function))
-        except ValueError:
+            _typing_extra.signature_no_eval(cast(_generate_schema.ValidateCallSupportedTypes, function))
+        except (ValueError, TypeError):
             raise PydanticUserError(
                 f"Input function `{function}` doesn't have a valid signature", code=_INVALID_TYPE_ERROR_CODE
             )
@@ -86,7 +86,8 @@ def validate_call(
     config: ConfigDict | None = None,
     validate_return: bool = False,
 ) -> AnyCallableT | Callable[[AnyCallableT], AnyCallableT]:
-    """Usage docs: https://docs.pydantic.dev/2.10/concepts/validation_decorator/
+    """!!! abstract "Usage Documentation"
+        [Validation Decorator](../concepts/validation_decorator.md)
 
     Returns a decorated wrapper around the function that validates the arguments and, optionally, the return value.
 
