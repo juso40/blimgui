@@ -128,6 +128,18 @@ Creating a custom theme is all about defining style properties in a simple text 
 ### 💖 Theme Contributions
 Created an awesome theme? Share it! Submit a `.txt` file via a Pull Request to the [`themes`](./themes) folder on GitHub.
 
+## Changelog
+#### 1.1
+[Download](https://github.com/juso40/blimgui/raw/master/blimgui.zip)
+
+Upgraded to support new SDK, added support for BL1E and BL4.
+
+#### 1.0
+[Download](https://github.com/juso40/blimgui/raw/9d624c29f2727dc43bcdac0bf74585c41a2f3bd1/blimgui.zip)
+
+Inital release.
+
+
 ## Contributing
 You can add this repo to your `unrealsdk.user.toml`:
 ```toml
