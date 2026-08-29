@@ -1,4 +1,5 @@
 import site
+import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -10,14 +11,13 @@ THREADED_RENDERING = False
 
 match Game.get_tree():
     case Game.Oak:
-        site.addsitedir(str(Path(__file__).parent.absolute() / "dist64"))
         THREADED_RENDERING = True
-    case Game.Willow2:
-        site.addsitedir(str(Path(__file__).parent.absolute() / "dist32"))
-    case Game.Willow1:
-        site.addsitedir(str(Path(__file__).parent.absolute() / "dist32"))
+    case Game.Willow1 | Game.Willow2 | Game.Oak2:
+        pass
     case _:
         raise RuntimeError("Unknown Game.")
+
+site.addsitedir(str(Path(__file__).parent.absolute() / ("dist64" if sys.maxsize > 2**32 else "dist32")))
 
 from imgui_bundle import (
     hello_imgui,  # type: ignore
@@ -184,7 +184,7 @@ imgui_theme = options.SpinnerOption(
     ALL_THEMES_NAMES[0] if ALL_THEMES_NAMES else "",
     ALL_THEMES_NAMES,
     wrap_enabled=True,
-    on_change=style_ui,
+    on_change_anytime=style_ui,
 )
 
 close_window = IMPL.close_window
