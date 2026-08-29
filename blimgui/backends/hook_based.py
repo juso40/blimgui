@@ -8,17 +8,11 @@ from unrealsdk.hooks import Type, add_hook
 
 from .backend import DrawCallback, RenderBackend
 
-try:
-    HOOK_ADDRESSES = {
-        Game.Willow1: "Engine.GameViewportClient:Tick",
-        Game.Willow2: "WillowGame.WillowGameViewportClient:Tick",
-    }
-except AttributeError:
-    # Fallback while the SDK's nightly is not released
-    HOOK_ADDRESSES = {
-        Game.Willow2: "WillowGame.WillowGameViewportClient:Tick",
-    }
-
+HOOK_ADDRESSES = {
+    Game.Willow1: "Engine.GameViewportClient:Tick",
+    Game.Willow2: "WillowGame.WillowGameViewportClient:Tick",
+    Game.Oak2: "/Script/Engine.CameraModifier:BlueprintModifyCamera",
+}
 
 class HookBasedBackend(RenderBackend):
     def initialize(self) -> None:
