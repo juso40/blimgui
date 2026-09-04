@@ -6,7 +6,7 @@ from _typeshed import SupportsAllComparisons
 from typing_extensions import LiteralString, Self, TypeAlias
 
 from pydantic_core import ErrorDetails, ErrorTypeInfo, InitErrorDetails, MultiHostHost
-from pydantic_core.core_schema import CoreConfig, CoreSchema, ErrorType
+from pydantic_core.core_schema import CoreConfig, CoreSchema, ErrorType, ExtraBehavior
 
 __all__ = [
     '__version__',
@@ -34,7 +34,6 @@ __all__ = [
     'to_jsonable_python',
     'list_all_errors',
     'TzInfo',
-    'validate_core_schema',
 ]
 __version__: str
 build_profile: str
@@ -74,15 +73,16 @@ class SchemaValidator:
     # note: pyo3 currently supports __new__, but not __init__, though we include __init__ stubs
     # and docstrings here (and in the following classes) for documentation purposes
 
-    def __init__(self, schema: CoreSchema, config: CoreConfig | None = None) -> None:
+    def __init__(self, schema: CoreSchema, config: CoreConfig | None = None, _use_prebuilt: bool = True) -> None:
         """Initializes the `SchemaValidator`.
 
         Arguments:
             schema: The `CoreSchema` to use for validation.
             config: Optionally a [`CoreConfig`][pydantic_core.core_schema.CoreConfig] to configure validation.
+            _use_prebuilt: Whether to use pre-built validators (False during rebuilds to avoid stale references).
         """
 
-    def __new__(cls, schema: CoreSchema, config: CoreConfig | None = None) -> Self: ...
+    def __new__(cls, schema: CoreSchema, config: CoreConfig | None = None, _use_prebuilt: bool = True) -> Self: ...
     @property
     def title(self) -> str:
         """
@@ -93,10 +93,13 @@ class SchemaValidator:
         input: Any,
         *,
         strict: bool | None = None,
+        extra: ExtraBehavior | None = None,
         from_attributes: bool | None = None,
         context: Any | None = None,
         self_instance: Any | None = None,
         allow_partial: bool | Literal['off', 'on', 'trailing-strings'] = False,
+        by_alias: bool | None = None,
+        by_name: bool | None = None,
     ) -> Any:
         """
         Validate a Python object against the schema and return the validated object.
@@ -105,6 +108,8 @@ class SchemaValidator:
             input: The Python object to validate.
             strict: Whether to validate the object in strict mode.
                 If `None`, the value of [`CoreConfig.strict`][pydantic_core.core_schema.CoreConfig] is used.
+            extra: Whether to ignore, allow, or forbid extra data during model validation.
+                If `None`, the value of [`CoreConfig.extra_fields_behavior`][pydantic_core.core_schema.CoreConfig] is used.
             from_attributes: Whether to validate objects as inputs to models by extracting attributes.
                 If `None`, the value of [`CoreConfig.from_attributes`][pydantic_core.core_schema.CoreConfig] is used.
             context: The context to use for validation, this is passed to functional validators as
@@ -114,6 +119,8 @@ class SchemaValidator:
             allow_partial: Whether to allow partial validation; if `True` errors in the last element of sequences
                 and mappings are ignored.
                 `'trailing-strings'` means any final unfinished JSON string is included in the result.
+            by_alias: Whether to use the field's alias when validating against the provided input data.
+            by_name: Whether to use the field's name when validating against the provided input data.
 
         Raises:
             ValidationError: If validation fails.
@@ -127,9 +134,12 @@ class SchemaValidator:
         input: Any,
         *,
         strict: bool | None = None,
+        extra: ExtraBehavior | None = None,
         from_attributes: bool | None = None,
         context: Any | None = None,
         self_instance: Any | None = None,
+        by_alias: bool | None = None,
+        by_name: bool | None = None,
     ) -> bool:
         """
         Similar to [`validate_python()`][pydantic_core.SchemaValidator.validate_python] but returns a boolean.
@@ -145,9 +155,12 @@ class SchemaValidator:
         input: str | bytes | bytearray,
         *,
         strict: bool | None = None,
+        extra: ExtraBehavior | None = None,
         context: Any | None = None,
         self_instance: Any | None = None,
         allow_partial: bool | Literal['off', 'on', 'trailing-strings'] = False,
+        by_alias: bool | None = None,
+        by_name: bool | None = None,
     ) -> Any:
         """
         Validate JSON data directly against the schema and return the validated Python object.
@@ -162,12 +175,16 @@ class SchemaValidator:
             input: The JSON data to validate.
             strict: Whether to validate the object in strict mode.
                 If `None`, the value of [`CoreConfig.strict`][pydantic_core.core_schema.CoreConfig] is used.
+            extra: Whether to ignore, allow, or forbid extra data during model validation.
+                If `None`, the value of [`CoreConfig.extra_fields_behavior`][pydantic_core.core_schema.CoreConfig] is used.
             context: The context to use for validation, this is passed to functional validators as
                 [`info.context`][pydantic_core.core_schema.ValidationInfo.context].
             self_instance: An instance of a model set attributes on from validation.
             allow_partial: Whether to allow partial validation; if `True` incomplete JSON will be parsed successfully
                 and errors in the last element of sequences and mappings are ignored.
                 `'trailing-strings'` means any final unfinished JSON string is included in the result.
+            by_alias: Whether to use the field's alias when validating against the provided input data.
+            by_name: Whether to use the field's name when validating against the provided input data.
 
         Raises:
             ValidationError: If validation fails or if the JSON data is invalid.
@@ -181,8 +198,11 @@ class SchemaValidator:
         input: _StringInput,
         *,
         strict: bool | None = None,
+        extra: ExtraBehavior | None = None,
         context: Any | None = None,
         allow_partial: bool | Literal['off', 'on', 'trailing-strings'] = False,
+        by_alias: bool | None = None,
+        by_name: bool | None = None,
     ) -> Any:
         """
         Validate a string against the schema and return the validated Python object.
@@ -194,11 +214,15 @@ class SchemaValidator:
             input: The input as a string, or bytes/bytearray if `strict=False`.
             strict: Whether to validate the object in strict mode.
                 If `None`, the value of [`CoreConfig.strict`][pydantic_core.core_schema.CoreConfig] is used.
+            extra: Whether to ignore, allow, or forbid extra data during model validation.
+                If `None`, the value of [`CoreConfig.extra_fields_behavior`][pydantic_core.core_schema.CoreConfig] is used.
             context: The context to use for validation, this is passed to functional validators as
                 [`info.context`][pydantic_core.core_schema.ValidationInfo.context].
             allow_partial: Whether to allow partial validation; if `True` errors in the last element of sequences
                 and mappings are ignored.
                 `'trailing-strings'` means any final unfinished JSON string is included in the result.
+            by_alias: Whether to use the field's alias when validating against the provided input data.
+            by_name: Whether to use the field's name when validating against the provided input data.
 
         Raises:
             ValidationError: If validation fails or if the JSON data is invalid.
@@ -214,8 +238,11 @@ class SchemaValidator:
         field_value: Any,
         *,
         strict: bool | None = None,
+        extra: ExtraBehavior | None = None,
         from_attributes: bool | None = None,
         context: Any | None = None,
+        by_alias: bool | None = None,
+        by_name: bool | None = None,
     ) -> dict[str, Any] | tuple[dict[str, Any], dict[str, Any] | None, set[str]]:
         """
         Validate an assignment to a field on a model.
@@ -226,10 +253,14 @@ class SchemaValidator:
             field_value: The value to assign to the field.
             strict: Whether to validate the object in strict mode.
                 If `None`, the value of [`CoreConfig.strict`][pydantic_core.core_schema.CoreConfig] is used.
+            extra: Whether to ignore, allow, or forbid extra data during model validation.
+                If `None`, the value of [`CoreConfig.extra_fields_behavior`][pydantic_core.core_schema.CoreConfig] is used.
             from_attributes: Whether to validate objects as inputs to models by extracting attributes.
                 If `None`, the value of [`CoreConfig.from_attributes`][pydantic_core.core_schema.CoreConfig] is used.
             context: The context to use for validation, this is passed to functional validators as
                 [`info.context`][pydantic_core.core_schema.ValidationInfo.context].
+            by_alias: Whether to use the field's alias when validating against the provided input data.
+            by_name: Whether to use the field's name when validating against the provided input data.
 
         Raises:
             ValidationError: If validation fails.
@@ -267,15 +298,16 @@ class SchemaSerializer:
     `CombinedSerializer` which may in turn own more `CombinedSerializer`s which make up the full schema serializer.
     """
 
-    def __init__(self, schema: CoreSchema, config: CoreConfig | None = None) -> None:
+    def __init__(self, schema: CoreSchema, config: CoreConfig | None = None, _use_prebuilt: bool = True) -> None:
         """Initializes the `SchemaSerializer`.
 
         Arguments:
             schema: The `CoreSchema` to use for serialization.
             config: Optionally a [`CoreConfig`][pydantic_core.core_schema.CoreConfig] to to configure serialization.
+            _use_prebuilt: Whether to use pre-built validators (False during rebuilds to avoid stale references).
         """
 
-    def __new__(cls, schema: CoreSchema, config: CoreConfig | None = None) -> Self: ...
+    def __new__(cls, schema: CoreSchema, config: CoreConfig | None = None, _use_prebuilt: bool = True) -> Self: ...
     def to_python(
         self,
         value: Any,
@@ -283,14 +315,16 @@ class SchemaSerializer:
         mode: str | None = None,
         include: _IncEx | None = None,
         exclude: _IncEx | None = None,
-        by_alias: bool = True,
+        by_alias: bool | None = None,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
+        exclude_computed_fields: bool = False,
         round_trip: bool = False,
         warnings: bool | Literal['none', 'warn', 'error'] = True,
         fallback: Callable[[Any], Any] | None = None,
         serialize_as_any: bool = False,
+        polymorphic_serialization: bool | None = None,
         context: Any | None = None,
     ) -> Any:
         """
@@ -307,12 +341,14 @@ class SchemaSerializer:
                 e.g. are not included in `__pydantic_fields_set__`.
             exclude_defaults: Whether to exclude fields that are equal to their default value.
             exclude_none: Whether to exclude fields that have a value of `None`.
+            exclude_computed_fields: Whether to exclude computed fields.
             round_trip: Whether to enable serialization and validation round-trip support.
             warnings: How to handle invalid fields. False/"none" ignores them, True/"warn" logs errors,
                 "error" raises a [`PydanticSerializationError`][pydantic_core.PydanticSerializationError].
             fallback: A function to call when an unknown value is encountered,
                 if `None` a [`PydanticSerializationError`][pydantic_core.PydanticSerializationError] error is raised.
             serialize_as_any: Whether to serialize fields with duck-typing serialization behavior.
+            polymorphic_serialization: Whether to use model and dataclass polymorphic serialization for this call.
             context: The context to use for serialization, this is passed to functional serializers as
                 [`info.context`][pydantic_core.core_schema.SerializationInfo.context].
 
@@ -327,16 +363,19 @@ class SchemaSerializer:
         value: Any,
         *,
         indent: int | None = None,
+        ensure_ascii: bool = False,
         include: _IncEx | None = None,
         exclude: _IncEx | None = None,
-        by_alias: bool = True,
+        by_alias: bool | None = None,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
+        exclude_computed_fields: bool = False,
         round_trip: bool = False,
         warnings: bool | Literal['none', 'warn', 'error'] = True,
         fallback: Callable[[Any], Any] | None = None,
         serialize_as_any: bool = False,
+        polymorphic_serialization: bool | None = None,
         context: Any | None = None,
     ) -> bytes:
         """
@@ -345,6 +384,8 @@ class SchemaSerializer:
         Arguments:
             value: The Python object to serialize.
             indent: If `None`, the JSON will be compact, otherwise it will be pretty-printed with the indent provided.
+            ensure_ascii: If `True`, the output is guaranteed to have all incoming non-ASCII characters escaped.
+                If `False` (the default), these characters will be output as-is.
             include: A set of fields to include, if `None` all fields are included.
             exclude: A set of fields to exclude, if `None` no fields are excluded.
             by_alias: Whether to use the alias names of fields.
@@ -352,12 +393,14 @@ class SchemaSerializer:
                 e.g. are not included in `__pydantic_fields_set__`.
             exclude_defaults: Whether to exclude fields that are equal to their default value.
             exclude_none: Whether to exclude fields that have a value of `None`.
+            exclude_computed_fields: Whether to exclude computed fields.
             round_trip: Whether to enable serialization and validation round-trip support.
             warnings: How to handle invalid fields. False/"none" ignores them, True/"warn" logs errors,
                 "error" raises a [`PydanticSerializationError`][pydantic_core.PydanticSerializationError].
             fallback: A function to call when an unknown value is encountered,
                 if `None` a [`PydanticSerializationError`][pydantic_core.PydanticSerializationError] error is raised.
             serialize_as_any: Whether to serialize fields with duck-typing serialization behavior.
+            polymorphic_serialization: Whether to use model and dataclass polymorphic serialization for this call.
             context: The context to use for serialization, this is passed to functional serializers as
                 [`info.context`][pydantic_core.core_schema.SerializationInfo.context].
 
@@ -372,17 +415,23 @@ def to_json(
     value: Any,
     *,
     indent: int | None = None,
+    ensure_ascii: bool = False,
     include: _IncEx | None = None,
     exclude: _IncEx | None = None,
+    # Note: In Pydantic 2.11, the default value of `by_alias` on `SchemaSerializer` was changed from `True` to `None`,
+    # to be consistent with the Pydantic "dump" methods. However, the default of `True` was kept here for
+    # backwards compatibility. In Pydantic V3, `by_alias` is expected to default to `True` everywhere:
     by_alias: bool = True,
     exclude_none: bool = False,
     round_trip: bool = False,
     timedelta_mode: Literal['iso8601', 'float'] = 'iso8601',
+    temporal_mode: Literal['iso8601', 'seconds', 'milliseconds'] = 'iso8601',
     bytes_mode: Literal['utf8', 'base64', 'hex'] = 'utf8',
     inf_nan_mode: Literal['null', 'constants', 'strings'] = 'constants',
     serialize_unknown: bool = False,
     fallback: Callable[[Any], Any] | None = None,
     serialize_as_any: bool = False,
+    polymorphic_serialization: bool | None = None,
     context: Any | None = None,
 ) -> bytes:
     """
@@ -393,12 +442,17 @@ def to_json(
     Arguments:
         value: The Python object to serialize.
         indent: If `None`, the JSON will be compact, otherwise it will be pretty-printed with the indent provided.
+        ensure_ascii: If `True`, the output is guaranteed to have all incoming non-ASCII characters escaped.
+            If `False` (the default), these characters will be output as-is.
         include: A set of fields to include, if `None` all fields are included.
         exclude: A set of fields to exclude, if `None` no fields are excluded.
         by_alias: Whether to use the alias names of fields.
         exclude_none: Whether to exclude fields that have a value of `None`.
         round_trip: Whether to enable serialization and validation round-trip support.
         timedelta_mode: How to serialize `timedelta` objects, either `'iso8601'` or `'float'`.
+        temporal_mode: How to serialize datetime-like objects (`datetime`, `date`, `time`), either `'iso8601'`, `'seconds'`, or `'milliseconds'`.
+            `iso8601` returns an ISO 8601 string; `seconds` returns the Unix timestamp in seconds as a float; `milliseconds` returns the Unix timestamp in milliseconds as a float.
+
         bytes_mode: How to serialize `bytes` objects, either `'utf8'`, `'base64'`, or `'hex'`.
         inf_nan_mode: How to serialize `Infinity`, `-Infinity` and `NaN` values, either `'null'`, `'constants'`, or `'strings'`.
         serialize_unknown: Attempt to serialize unknown types, `str(value)` will be used, if that fails
@@ -406,6 +460,7 @@ def to_json(
         fallback: A function to call when an unknown value is encountered,
             if `None` a [`PydanticSerializationError`][pydantic_core.PydanticSerializationError] error is raised.
         serialize_as_any: Whether to serialize fields with duck-typing serialization behavior.
+        polymorphic_serialization: Whether to use model and dataclass polymorphic serialization for this call.
         context: The context to use for serialization, this is passed to functional serializers as
             [`info.context`][pydantic_core.core_schema.SerializationInfo.context].
 
@@ -450,15 +505,20 @@ def to_jsonable_python(
     *,
     include: _IncEx | None = None,
     exclude: _IncEx | None = None,
+    # Note: In Pydantic 2.11, the default value of `by_alias` on `SchemaSerializer` was changed from `True` to `None`,
+    # to be consistent with the Pydantic "dump" methods. However, the default of `True` was kept here for
+    # backwards compatibility. In Pydantic V3, `by_alias` is expected to default to `True` everywhere:
     by_alias: bool = True,
     exclude_none: bool = False,
     round_trip: bool = False,
     timedelta_mode: Literal['iso8601', 'float'] = 'iso8601',
+    temporal_mode: Literal['iso8601', 'seconds', 'milliseconds'] = 'iso8601',
     bytes_mode: Literal['utf8', 'base64', 'hex'] = 'utf8',
     inf_nan_mode: Literal['null', 'constants', 'strings'] = 'constants',
     serialize_unknown: bool = False,
     fallback: Callable[[Any], Any] | None = None,
     serialize_as_any: bool = False,
+    polymorphic_serialization: bool | None = None,
     context: Any | None = None,
 ) -> Any:
     """
@@ -475,6 +535,9 @@ def to_jsonable_python(
         exclude_none: Whether to exclude fields that have a value of `None`.
         round_trip: Whether to enable serialization and validation round-trip support.
         timedelta_mode: How to serialize `timedelta` objects, either `'iso8601'` or `'float'`.
+        temporal_mode: How to serialize datetime-like objects (`datetime`, `date`, `time`), either `'iso8601'`, `'seconds'`, or `'milliseconds'`.
+            `iso8601` returns an ISO 8601 string; `seconds` returns the Unix timestamp in seconds as a float; `milliseconds` returns the Unix timestamp in milliseconds as a float.
+
         bytes_mode: How to serialize `bytes` objects, either `'utf8'`, `'base64'`, or `'hex'`.
         inf_nan_mode: How to serialize `Infinity`, `-Infinity` and `NaN` values, either `'null'`, `'constants'`, or `'strings'`.
         serialize_unknown: Attempt to serialize unknown types, `str(value)` will be used, if that fails
@@ -482,6 +545,7 @@ def to_jsonable_python(
         fallback: A function to call when an unknown value is encountered,
             if `None` a [`PydanticSerializationError`][pydantic_core.PydanticSerializationError] error is raised.
         serialize_as_any: Whether to serialize fields with duck-typing serialization behavior.
+        polymorphic_serialization: Whether to use model and dataclass polymorphic serialization for this call.
         context: The context to use for serialization, this is passed to functional serializers as
             [`info.context`][pydantic_core.core_schema.SerializationInfo.context].
 
@@ -609,9 +673,6 @@ class ValidationError(ValueError):
         """
         Python constructor for a Validation Error.
 
-        The API for constructing validation errors will probably change in the future,
-        hence the static method rather than `__init__`.
-
         Arguments:
             title: The title of the error, as used in the heading of `str(validation_error)`
             line_errors: A list of [`InitErrorDetails`][pydantic_core.InitErrorDetails] which contain information
@@ -690,22 +751,16 @@ class PydanticCustomError(ValueError):
                 raise PydanticCustomError('custom_value_error', 'Value must be greater than {value}', {'value': 10, 'extra_context': 'extra_data'})
             return v
         ```
+
+    Arguments:
+        error_type: The error type.
+        message_template: The message template.
+        context: The data to inject into the message template.
     """
 
     def __init__(
-        self, error_type: LiteralString, message_template: LiteralString, context: dict[str, Any] | None = None
-    ) -> None:
-        """Initializes the `PydanticCustomError`.
-
-        Arguments:
-            error_type: The error type.
-            message_template: The message template.
-            context: The data to inject into the message template.
-        """
-
-    def __new__(
-        cls, error_type: LiteralString, message_template: LiteralString, context: dict[str, Any] | None = None
-    ) -> Self: ...
+        self, error_type: LiteralString, message_template: LiteralString, context: dict[str, Any] | None = None, /
+    ) -> None: ...
     @property
     def context(self) -> dict[str, Any] | None:
         """Values which are required to render the error message, and could hence be useful in passing error data forward."""
@@ -733,20 +788,16 @@ class PydanticKnownError(ValueError):
 
         def custom_validator(v) -> None:
             if v <= 10:
-                raise PydanticKnownError(error_type='greater_than', context={'gt': 10})
+                raise PydanticKnownError('greater_than', {'gt': 10})
             return v
         ```
+
+    Arguments:
+        error_type: The error type.
+        context: The data to inject into the message template.
     """
 
-    def __init__(self, error_type: ErrorType, context: dict[str, Any] | None = None) -> None:
-        """Initializes the `PydanticKnownError`.
-
-        Arguments:
-            error_type: The error type.
-            context: The data to inject into the message template.
-        """
-
-    def __new__(cls, error_type: ErrorType, context: dict[str, Any] | None = None) -> Self: ...
+    def __init__(self, error_type: ErrorType, context: dict[str, Any] | None = None, /) -> None: ...
     @property
     def context(self) -> dict[str, Any] | None:
         """Values which are required to render the error message, and could hence be useful in passing error data forward."""
@@ -808,7 +859,7 @@ class PydanticOmit(Exception):
 class PydanticUseDefault(Exception):
     """An exception to signal that standard validation either failed or should be skipped, and the default value should be used instead.
 
-    This warning can be raised in custom valiation functions to redirect the flow of validation.
+    This warning can be raised in custom validation functions to redirect the flow of validation.
 
     Example:
         ```py
@@ -836,7 +887,7 @@ class PydanticUseDefault(Exception):
         # > Event(name='meeting', time=datetime.datetime(2024, 1, 1, 12, 0))
         ```
 
-    For an additional example, seethe [validating partial json data](../concepts/json.md#partial-json-parsing) section of the Pydantic documentation.
+    For an additional example, see the [validating partial json data](../concepts/json.md#partial-json-parsing) section of the Pydantic documentation.
     """
 
     def __new__(cls) -> Self: ...
@@ -846,16 +897,12 @@ class PydanticSerializationError(ValueError):
     """An error raised when an issue occurs during serialization.
 
     In custom serializers, this error can be used to indicate that serialization has failed.
+
+    Arguments:
+        message: The message associated with the error.
     """
 
-    def __init__(self, message: str) -> None:
-        """Initializes the `PydanticSerializationError`.
-
-        Arguments:
-            message: The message associated with the error.
-        """
-
-    def __new__(cls, message: str) -> Self: ...
+    def __init__(self, message: str, /) -> None: ...
 
 @final
 class PydanticSerializationUnexpectedValue(ValueError):
@@ -894,16 +941,12 @@ class PydanticSerializationUnexpectedValue(ValueError):
 
     This is often used internally in `pydantic-core` when unexpected types are encountered during serialization,
     but it can also be used by users in custom serializers, as seen above.
+
+    Arguments:
+        message: The message associated with the unexpected value.
     """
 
-    def __init__(self, message: str) -> None:
-        """Initializes the `PydanticSerializationUnexpectedValue`.
-
-        Arguments:
-            message: The message associated with the unexpected value.
-        """
-
-    def __new__(cls, message: str | None = None) -> Self: ...
+    def __init__(self, message: str, /) -> None: ...
 
 @final
 class ArgsKwargs:
@@ -975,7 +1018,16 @@ def list_all_errors() -> list[ErrorTypeInfo]:
     """
 @final
 class TzInfo(datetime.tzinfo):
-    """An `pydantic-core` implementation of the abstract [`datetime.tzinfo`] class."""
+    """An `pydantic-core` implementation of the abstract [`datetime.tzinfo`][] class."""
+
+    def __init__(self, seconds: float = 0.0) -> None:
+        """Initializes the `TzInfo`.
+
+        Arguments:
+            seconds: The offset from UTC in seconds. Defaults to 0.0 (UTC).
+        """
+
+    def __new__(cls, seconds: float = 0.0) -> Self: ...
 
     # Docstrings for attributes sourced from the abstract base class, [`datetime.tzinfo`](https://docs.python.org/3/library/datetime.html#datetime.tzinfo).
 
@@ -1002,12 +1054,3 @@ class TzInfo(datetime.tzinfo):
         More info can be found at [`tzinfo.fromutc`][datetime.tzinfo.fromutc]."""
 
     def __deepcopy__(self, _memo: dict[Any, Any]) -> TzInfo: ...
-
-def validate_core_schema(schema: CoreSchema, *, strict: bool | None = None) -> CoreSchema:
-    """Validate a core schema.
-
-    This currently uses lax mode for validation (i.e. will coerce strings to dates and such)
-    but may use strict mode in the future.
-    We may also remove this function altogether, do not rely on it being present if you are
-    using pydantic-core directly.
-    """

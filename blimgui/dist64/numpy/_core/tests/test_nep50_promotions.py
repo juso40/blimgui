@@ -5,16 +5,13 @@ is adopted in the main test suite.  A few may be moved elsewhere.
 """
 
 import operator
-import threading
-import warnings
 
-import numpy as np
-
-import pytest
 import hypothesis
+import pytest
 from hypothesis import strategies
 
-from numpy.testing import assert_array_equal, IS_WASM
+import numpy as np
+from numpy.testing import IS_WASM, assert_array_equal
 
 
 @pytest.mark.skipif(IS_WASM, reason="wasm doesn't have support for fp errors")
@@ -130,7 +127,7 @@ def test_nep50_complex_promotion():
     with pytest.warns(RuntimeWarning, match=".*overflow"):
         res = np.complex64(3) + complex(2**300)
 
-    assert type(res) == np.complex64
+    assert type(res) is np.complex64
 
 
 def test_nep50_integer_conversion_errors():
@@ -215,7 +212,7 @@ def test_expected_promotion(expected, dtypes, optional_dtypes, data):
         [np.int8, np.int16, np.int32, np.int64,
          np.uint8, np.uint16, np.uint32, np.uint64])
 @pytest.mark.parametrize("other_val",
-        [-2*100, -1, 0, 9, 10, 11, 2**63, 2*100])
+        [-2 * 100, -1, 0, 9, 10, 11, 2**63, 2 * 100])
 @pytest.mark.parametrize("comp",
         [operator.eq, operator.ne, operator.le, operator.lt,
          operator.ge, operator.gt])

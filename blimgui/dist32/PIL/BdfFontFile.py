@@ -20,22 +20,12 @@
 """
 Parse X Bitmap Distribution Format (BDF)
 """
+
 from __future__ import annotations
 
 from typing import BinaryIO
 
 from . import FontFile, Image
-
-bdf_slant = {
-    "R": "Roman",
-    "I": "Italic",
-    "O": "Oblique",
-    "RI": "Reverse Italic",
-    "RO": "Reverse Oblique",
-    "OT": "Other",
-}
-
-bdf_spacing = {"P": "Proportional", "M": "Monospaced", "C": "Cell"}
 
 
 def bdf_char(
@@ -54,7 +44,7 @@ def bdf_char(
         s = f.readline()
         if not s:
             return None
-        if s[:9] == b"STARTCHAR":
+        if s.startswith(b"STARTCHAR"):
             break
     id = s[9:].strip().decode("ascii")
 
@@ -62,7 +52,7 @@ def bdf_char(
     props = {}
     while True:
         s = f.readline()
-        if not s or s[:6] == b"BITMAP":
+        if not s or s.startswith(b"BITMAP"):
             break
         i = s.find(b" ")
         props[s[:i].decode("ascii")] = s[i + 1 : -1].decode("ascii")
@@ -71,7 +61,7 @@ def bdf_char(
     bitmap = bytearray()
     while True:
         s = f.readline()
-        if not s or s[:7] == b"ENDCHAR":
+        if not s or s.startswith(b"ENDCHAR"):
             break
         bitmap += s[:-1]
 
@@ -80,6 +70,7 @@ def bdf_char(
     # and x and y displacement (BBxoff0, BByoff0)
     # of the lower left corner from the origin of the character.
     width, height, x_disp, y_disp = (int(p) for p in props["BBX"].split())
+    Image._decompression_bomb_check((width, height))
 
     # The word DWIDTH
     # followed by the width in x and y of the character in device pixels.
@@ -107,7 +98,7 @@ class BdfFontFile(FontFile.FontFile):
         super().__init__()
 
         s = fp.readline()
-        if s[:13] != b"STARTFONT 2.1":
+        if not s.startswith(b"STARTFONT 2.1"):
             msg = "not a valid BDF file"
             raise SyntaxError(msg)
 
@@ -116,7 +107,7 @@ class BdfFontFile(FontFile.FontFile):
 
         while True:
             s = fp.readline()
-            if not s or s[:13] == b"ENDPROPERTIES":
+            if not s or s.startswith(b"ENDPROPERTIES"):
                 break
             i = s.find(b" ")
             props[s[:i].decode("ascii")] = s[i + 1 : -1].decode("ascii")

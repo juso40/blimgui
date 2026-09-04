@@ -3,7 +3,7 @@
 import logging
 from OpenGL import _configflags
 
-needed_version = (3, 1, 9)
+needed_version = (3, 1, 10)
 _log = logging.getLogger("OpenGL.acceleratesupport")
 try:
     import OpenGL_accelerate

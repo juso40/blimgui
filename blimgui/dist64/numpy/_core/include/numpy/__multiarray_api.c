@@ -227,7 +227,7 @@ void *PyArray_API[] = {
         NULL,
         NULL,
         NULL,
-        NULL,
+        (void *) NpyIter_GetTransferFlags,
         (void *) NpyIter_New,
         (void *) NpyIter_MultiNew,
         (void *) NpyIter_AdvancedNew,
@@ -372,5 +372,15 @@ void *PyArray_API[] = {
         (void *) _PyDataType_GetArrFuncs,
         NULL,
         NULL,
-        NULL
+        NULL,
+        (void *) _PyArray_GET_ITEM_DATA,
+        (void *) _PyArrayIter_GET_ITEM_DATA,
+        (void *) _PyArray_LegacyDescr_GET_ITEM_DATA,
+        (void *) _PyDataType_GET_ITEM_DATA,
+        (void *) _PyArrayMultiIter_GET_ITEM_DATA,
+        (void *) _PyArrayNeighborhoodIter_GET_ITEM_DATA,
+        (void *) _PyDatetimeScalarObject_GetMetadata,
+        (void *) _PyTimedeltaScalarObject_GetMetadata,
+        (void *) _PyDatetimeScalarObject_GetValue,
+        (void *) _PyTimedeltaScalarObject_GetValue
 };

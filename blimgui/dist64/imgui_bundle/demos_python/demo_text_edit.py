@@ -10,15 +10,14 @@ def _prepare_text_editor():
         this_file_code = f.read()
     editor = TextEditor()
     editor.set_text(this_file_code)
-    editor.set_language_definition(TextEditor.LanguageDefinitionId.python)
+    editor.set_language_definition(TextEditor.LanguageDefinition.python())
     return editor
 
 
-@static(editor=None)
+@static(editor=_prepare_text_editor())
 def demo_gui():
-    if demo_gui.editor is None:
-        demo_gui.editor = _prepare_text_editor()
-    editor = demo_gui.editor
+    static = demo_gui
+    editor = static.editor
 
     imgui_md.render(
         """
@@ -29,16 +28,16 @@ def demo_gui():
 
     def show_palette_buttons():
         if imgui.small_button("Dark palette"):
-            editor.set_palette(ed.TextEditor.PaletteId.dark)
+            editor.set_palette(ed.TextEditor.get_dark_palette())
         imgui.same_line()
         if imgui.small_button("Light palette"):
-            editor.set_palette(TextEditor.PaletteId.light)
+            editor.set_palette(TextEditor.get_light_palette())
         imgui.same_line()
         if imgui.small_button("Retro blue palette"):
-            editor.set_palette(TextEditor.PaletteId.retro_blue)
+            editor.set_palette(TextEditor.get_retro_blue_palette())
         imgui.same_line()
         if imgui.small_button("Mariana palette"):
-            editor.set_palette(TextEditor.PaletteId.mariana)
+            editor.set_palette(TextEditor.get_mariana_palette())
 
     show_palette_buttons()
     imgui.push_font(imgui_md.get_code_font())

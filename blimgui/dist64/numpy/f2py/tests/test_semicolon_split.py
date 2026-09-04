@@ -1,4 +1,5 @@
 import platform
+
 import pytest
 
 from numpy.testing import IS_64BIT
@@ -14,6 +15,7 @@ from . import util
 @pytest.mark.skipif(
     not IS_64BIT, reason="32-bit builds are buggy"
 )
+@pytest.mark.slow
 class TestMultiline(util.F2PyTest):
     suffix = ".pyf"
     module_name = "multiline"

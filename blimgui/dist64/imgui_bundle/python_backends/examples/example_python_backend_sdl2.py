@@ -1,4 +1,4 @@
-# An example of using Dear ImGui with SDL2 using a *full python* backend.
+# An example of using Dear ImGui with SDL using a *full python* backend.
 # This mode is inspired from [pyimgui](https://github.com/pyimgui/pyimgui) backends, and is still experimental.
 #
 # See full python backends implementations here:
@@ -8,7 +8,7 @@
 #    pip install pysdl2 pysdl2-dll
 
 from imgui_bundle import imgui
-from imgui_bundle.python_backends.sdl2_backend import SDL2Renderer
+from imgui_bundle.python_backends.sdl_backend import SDL2Renderer
 import OpenGL.GL as gl  # type: ignore
 from sdl2 import *  # type: ignore
 import ctypes
@@ -41,8 +41,6 @@ def main():
         impl.process_inputs()
 
         imgui.new_frame()
-
-        imgui.show_demo_window()
 
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):

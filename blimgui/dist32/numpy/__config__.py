@@ -33,7 +33,7 @@ CONFIG = _cleanup(
             "c": {
                 "name": "msvc",
                 "linker": r"link",
-                "version": "19.29.30157",
+                "version": "19.44.35228",
                 "commands": r"cl",
                 "args": r"",
                 "linker args": r"",
@@ -41,7 +41,7 @@ CONFIG = _cleanup(
             "cython": {
                 "name": "cython",
                 "linker": r"cython",
-                "version": "3.0.11",
+                "version": "3.2.9",
                 "commands": r"cython",
                 "args": r"",
                 "linker args": r"",
@@ -49,7 +49,7 @@ CONFIG = _cleanup(
             "c++": {
                 "name": "msvc",
                 "linker": r"link",
-                "version": "19.29.30157",
+                "version": "19.44.35228",
                 "commands": r"cl",
                 "args": r"",
                 "linker args": r"",
@@ -68,12 +68,12 @@ CONFIG = _cleanup(
                 "endian": "little",
                 "system": "windows",
             },
-            "cross-compiled": bool("False".lower().replace("false", "")),
+            "cross-compiled": False,
         },
         "Build Dependencies": {
             "blas": {
                 "name": "auto",
-                "found": bool("False".lower().replace("false", "")),
+                "found": False,
                 "version": "",
                 "detection method": "",
                 "include directory": r"",
@@ -83,7 +83,7 @@ CONFIG = _cleanup(
             },
             "lapack": {
                 "name": "lapack",
-                "found": bool("False".lower().replace("false", "")),
+                "found": False,
                 "version": "",
                 "detection method": "",
                 "include directory": r"",
@@ -93,8 +93,8 @@ CONFIG = _cleanup(
             },
         },
         "Python Information": {
-            "path": r"C:\Users\runneradmin\AppData\Local\Temp\build-env-dhrr34oo\Scripts\python.exe",
-            "version": "3.13",
+            "path": r"C:\Users\runneradmin\AppData\Local\Temp\build-env-kk7foh_7\Scripts\python.exe",
+            "version": "3.14",
         },
         "SIMD Extensions": {
             "baseline": __cpu_baseline__,

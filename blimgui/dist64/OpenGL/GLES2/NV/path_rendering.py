@@ -267,7 +267,7 @@ Overview (from the spec)
 	    GLfloat xtranslate[6+1];  // wordLen+1
 	    glGetPathSpacingNV(GL_ACCUM_ADJACENT_PAIRS_NV,
 	                       wordLen+1, GL_UNSIGNED_BYTE,
-	                       "\000\001\002\003\004\005\005",  // repeat last letter twice
+	                       "\\000\\001\\002\\003\\004\\005\\005",  // repeat last letter twice
 	                       glyphBase,
 	                       1.0f, 1.0f,
 	                       GL_TRANSLATE_X_NV,
@@ -295,7 +295,7 @@ Overview (from the spec)
 	each transformed by the appropriate 2D translations for spacing.
 	
 	    glStencilFillPathInstancedNV(6, GL_UNSIGNED_BYTE,
-	                                 "\000\001\002\003\004\005",
+	                                 "\\000\\001\\002\\003\\004\\005",
 	                                 glyphBase,
 	                                 GL_PATH_FILL_MODE_NV, 0xFF,
 	                                 GL_TRANSLATE_X_NV, xtranslate);
@@ -307,7 +307,7 @@ Overview (from the spec)
 	    glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
 	    glColor3f(0.5,0.5,0.5); // 50% gray
 	    glCoverFillPathInstancedNV(6, GL_UNSIGNED_BYTE,
-	                               "\000\001\002\003\004\005",
+	                               "\\000\\001\\002\\003\\004\\005",
 	                               glyphBase,
 	                               GL_BOUNDING_BOX_OF_BOUNDING_BOXES_NV,
 	                               GL_TRANSLATE_X_NV, xtranslate);

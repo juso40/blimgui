@@ -1,11 +1,9 @@
-import fractions
 import decimal
-from typing import Any
+import fractions
+from typing import assert_type
 
 import numpy as np
 import numpy.typing as npt
-
-from typing_extensions import assert_type
 
 c16 = np.complex128()
 f8 = np.float64()
@@ -22,10 +20,10 @@ td = np.timedelta64(0, "D")
 
 b_ = np.bool()
 
-b = bool()
-c = complex()
-f = float()
-i = int()
+b = False
+c = 0j
+f = 0.0
+i = 0
 
 AR = np.array([0], dtype=np.int64)
 AR.setflags(write=False)
@@ -44,15 +42,15 @@ assert_type(i8 > [decimal.Decimal("1.5")], npt.NDArray[np.bool])
 assert_type(dt > dt, np.bool)
 
 assert_type(td > td, np.bool)
-assert_type(td > i, np.bool)
-assert_type(td > i4, np.bool)
-assert_type(td > i8, np.bool)
+assert_type(td > i, np.bool)  # type: ignore[deprecated]
+assert_type(td > i4, np.bool)  # type: ignore[deprecated]
+assert_type(td > i8, np.bool)  # type: ignore[deprecated]
 
-assert_type(td > AR, npt.NDArray[np.bool])
-assert_type(td > SEQ, npt.NDArray[np.bool])
+assert_type(td > AR, npt.NDArray[np.bool])  # type: ignore[deprecated]
+assert_type(td > SEQ, npt.NDArray[np.bool])  # type: ignore[deprecated]
 assert_type(AR > SEQ, npt.NDArray[np.bool])
 assert_type(AR > td, npt.NDArray[np.bool])
-assert_type(SEQ > td, npt.NDArray[np.bool])
+assert_type(SEQ > td, npt.NDArray[np.bool])  # type: ignore[deprecated]
 assert_type(SEQ > AR, npt.NDArray[np.bool])
 
 # boolean

@@ -3,7 +3,7 @@ Python bindings for https://github.com/thedmd/imgui-node-editor
 """
 
 # ruff: noqa: B008
-from typing import Any, Optional, List, overload
+from typing import Any, Optional, overload
 import enum
 from imgui_bundle.imgui import ImVec2, ImVec4, ImDrawList, ImVec2Like, ImVec4Like
 from imgui_bundle import imgui
@@ -84,15 +84,6 @@ def resume_editor_canvas() -> None:
 #   Written by Michal Cichon
 # ------------------------------------------------------------------------------
 # # ifndef __IMGUI_NODE_EDITOR_H__
-#
-
-#
-# Adaptations for ImGui Bundle are noted with [ADAPT_IMGUI_BUNDLE]
-#
-# [ADAPT_IMGUI_BUNDLE]
-# #ifdef IMGUI_BUNDLE_PYTHON_API
-#
-# #endif
 #
 
 # ------------------------------------------------------------------------------
@@ -500,8 +491,9 @@ def pop_style_var(count: int = 1) -> None:
 
 # IMGUI_NODE_EDITOR_API void Begin(const char* id, const ImVec2& size = ImVec2(0, 0));    /* original C++ signature */
 def begin(id: str, size: Optional[ImVec2Like] = None) -> None:
-    """Python bindings defaults:
-    If size is None, then its default value will be: ImVec2(0, 0)
+    """---
+    Python bindings defaults:
+        If size is None, then its default value will be: ImVec2(0, 0)
     """
     pass
 
@@ -586,8 +578,9 @@ def link(
     color: Optional[ImVec4Like] = None,
     thickness: float = 1.0,
 ) -> bool:
-    """Python bindings defaults:
-    If color is None, then its default value will be: ImVec4(1, 1, 1, 1)
+    """---
+    Python bindings defaults:
+        If color is None, then its default value will be: ImVec4(1, 1, 1, 1)
     """
     pass
 
@@ -597,8 +590,9 @@ def flow(link_id: LinkId, direction: FlowDirection = FlowDirection.forward) -> N
 
 # IMGUI_NODE_EDITOR_API bool BeginCreate(const ImVec4& color = ImVec4(1, 1, 1, 1), float thickness = 1.0f);    /* original C++ signature */
 def begin_create(color: Optional[ImVec4Like] = None, thickness: float = 1.0) -> bool:
-    """Python bindings defaults:
-    If color is None, then its default value will be: ImVec4(1, 1, 1, 1)
+    """---
+    Python bindings defaults:
+        If color is None, then its default value will be: ImVec4(1, 1, 1, 1)
     """
     pass
 
@@ -732,18 +726,14 @@ def has_selection_changed() -> bool:
 def get_selected_object_count() -> int:
     pass
 
-# #ifdef IMGUI_BUNDLE_PYTHON_API
-#
-# IMGUI_NODE_EDITOR_API std::vector<NodeId> GetSelectedNodes();    /* original C++ signature */
-def get_selected_nodes() -> List[NodeId]:
+# IMGUI_NODE_EDITOR_API int  GetSelectedNodes(NodeId* nodes, int size);    /* original C++ signature */
+def get_selected_nodes(nodes: NodeId, size: int) -> int:
     pass
 
-# IMGUI_NODE_EDITOR_API std::vector<LinkId> GetSelectedLinks();    /* original C++ signature */
-def get_selected_links() -> List[LinkId]:
+# IMGUI_NODE_EDITOR_API int  GetSelectedLinks(LinkId* links, int size);    /* original C++ signature */
+def get_selected_links(links: LinkId, size: int) -> int:
     pass
 
-# #endif
-#
 # IMGUI_NODE_EDITOR_API bool IsNodeSelected(NodeId nodeId);    /* original C++ signature */
 def is_node_selected(node_id: NodeId) -> bool:
     pass
@@ -882,18 +872,14 @@ def accept_create_node() -> bool:
 def get_action_context_size() -> int:
     pass
 
-# #ifdef IMGUI_BUNDLE_PYTHON_API
-#
-# IMGUI_NODE_EDITOR_API std::vector<NodeId> GetActionContextNodes();    /* original C++ signature */
-def get_action_context_nodes() -> List[NodeId]:
+# IMGUI_NODE_EDITOR_API int  GetActionContextNodes(NodeId* nodes, int size);    /* original C++ signature */
+def get_action_context_nodes(nodes: NodeId, size: int) -> int:
     pass
 
-# IMGUI_NODE_EDITOR_API std::vector<LinkId> GetActionContextLinks();    /* original C++ signature */
-def get_action_context_links() -> List[LinkId]:
+# IMGUI_NODE_EDITOR_API int  GetActionContextLinks(LinkId* links, int size);    /* original C++ signature */
+def get_action_context_links(links: LinkId, size: int) -> int:
     pass
 
-# #endif
-#
 # IMGUI_NODE_EDITOR_API void EndShortcut();    /* original C++ signature */
 def end_shortcut() -> None:
     pass
@@ -967,18 +953,13 @@ def canvas_to_screen(pos: ImVec2Like) -> ImVec2:
 
 # IMGUI_NODE_EDITOR_API int GetNodeCount();                                    /* original C++ signature */
 def get_node_count() -> int:
+    """Returns number of submitted nodes since Begin() call"""
     pass
 
-# Returns number of submitted nodes since Begin() call
-# #ifdef IMGUI_BUNDLE_PYTHON_API
-#
-# IMGUI_NODE_EDITOR_API std::vector<NodeId> GetOrderedNodeIds();    /* original C++ signature */
-def get_ordered_node_ids() -> List[NodeId]:
-    """Fills an array with node id's in order they're drawn"""
+# IMGUI_NODE_EDITOR_API int GetOrderedNodeIds(NodeId* nodes, int size);        /* original C++ signature */
+def get_ordered_node_ids(nodes: NodeId, size: int) -> int:
+    """Fills an array with node id's in order they're drawn; up to 'size` elements are set. Returns actual size of filled id's."""
     pass
-
-# #endif
-#
 
 # ------------------------------------------------------------------------------
 

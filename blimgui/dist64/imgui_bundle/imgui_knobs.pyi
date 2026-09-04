@@ -54,8 +54,9 @@ def knob(
     flags: ImGuiKnobFlags = 0,
     steps: int = 10,
 ) -> Tuple[bool, float]:
-    """Python bindings defaults:
-    If variant is None, then its default value will be: ImGuiKnobVariant_.tick
+    """---
+    Python bindings defaults:
+        If variant is None, then its default value will be: ImGuiKnobVariant_.tick
     """
     pass
 
@@ -71,8 +72,9 @@ def knob_int(
     flags: ImGuiKnobFlags = 0,
     steps: int = 10,
 ) -> Tuple[bool, int]:
-    """Python bindings defaults:
-    If variant is None, then its default value will be: ImGuiKnobVariant_.tick
+    """---
+    Python bindings defaults:
+        If variant is None, then its default value will be: ImGuiKnobVariant_.tick
     """
     pass
 

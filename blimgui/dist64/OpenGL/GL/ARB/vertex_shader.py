@@ -128,26 +128,32 @@ from OpenGL._bytes import bytes, _NULL_8_BYTE, as_8_bit
 from OpenGL.lazywrapper import lazy as _lazy
 from OpenGL.GL.ARB.shader_objects import glGetObjectParameterivARB
 
-@_lazy( glGetActiveAttribARB )
+
+@_lazy(glGetActiveAttribARB)
 def glGetActiveAttribARB(baseOperation, program, index):
     """Retrieve the name, size and type of the uniform of the index in the program"""
-    max_index = int(glGetObjectParameterivARB( program, GL_OBJECT_ACTIVE_ATTRIBUTES_ARB ))
-    length = int(glGetObjectParameterivARB( program, GL_OBJECT_ACTIVE_ATTRIBUTE_MAX_LENGTH_ARB))
+    max_index = int(glGetObjectParameterivARB(program, GL_OBJECT_ACTIVE_ATTRIBUTES_ARB))
+    length = int(
+        glGetObjectParameterivARB(program, GL_OBJECT_ACTIVE_ATTRIBUTE_MAX_LENGTH_ARB)
+    )
     if index < max_index and index >= 0 and length > 0:
-        length,name,size,type = baseOperation( program, index )
-        if hasattr(name,'tostring'):
+        length, name, size, type = baseOperation(program, index)
+        if hasattr(name, 'tobytes'):
+            name = name.tobytes().rstrip(b'\000')
+        elif hasattr(name, 'tostring'):
             name = name.tostring().rstrip(b'\000')
-        elif hasattr(name,'value'):
+        elif hasattr(name, 'value'):
             name = name.value
-        return name,size,type
-    raise IndexError('index out of range from zero to %i' % (max_index - 1, ))
+        return name, size, type
+    raise IndexError('index out of range from zero to %i' % (max_index - 1,))
 
-@_lazy( glGetAttribLocationARB )
-def glGetAttribLocationARB( baseOperation, program, name ):
+
+@_lazy(glGetAttribLocationARB)
+def glGetAttribLocationARB(baseOperation, program, name):
     """Check that name is a string with a null byte at the end of it"""
     if not name:
-        raise ValueError( """Non-null name required""" )
-    name = as_8_bit( name )
+        raise ValueError("""Non-null name required""")
+    name = as_8_bit(name)
     if name[-1] != _NULL_8_BYTE:
         name = name + _NULL_8_BYTE
-    return baseOperation( program, name )
+    return baseOperation(program, name)

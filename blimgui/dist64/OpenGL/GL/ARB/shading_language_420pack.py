@@ -9,7 +9,7 @@ Overview (from the spec)
 	This is a language feature only extension formed from changes made
 	to version 4.20 of GLSL.  It includes:
 	
-	* Add line-continuation using '\', as in C++.
+	* Add line-continuation using '\\', as in C++.
 	
 	* Change from ASCII to UTF-8 for the language character set and also 
 	  allow any characters inside comments.

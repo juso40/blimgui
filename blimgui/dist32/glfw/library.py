@@ -173,6 +173,14 @@ def _get_library_search_paths():
         '/usr/lib/x86_64-linux-gnu/',
         '/usr/lib/aarch64-linux-gnu/',
         '/usr/lib/arm-linux-gnueabihf',
+        '/usr/lib/riscv64-linux-gnu',
+        '/usr/lib/powerpc64le-linux-gnu',
+        '/usr/lib/loongarch64-linux-gnu',
+        '/usr/lib/s390x-linux-gnu',
+        '/usr/lib/i386-linux-gnu',
+        '/usr/lib/arm-linux-gnueabi',
+        '/usr/lib/sparc64-linux-gnu',
+        '/usr/lib/mips64el-linux-gnuabi64',
     ]
 
     package_path_variant = _get_package_path_variant(package_path)
@@ -219,7 +227,7 @@ def _get_package_path_variant(package_path):
 
 if os.environ.get('PYGLFW_LIBRARY', ''):
     try:
-        glfw = ctypes.CDLL(os.environ['PYGLFW_LIBRARY'])
+        glfw = ctypes.CDLL(os.environ['PYGLFW_LIBRARY'])  # type: ctypes.CDLL | None
     except OSError:
         glfw = None
 elif sys.platform == 'win32':

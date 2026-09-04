@@ -1,5 +1,4 @@
-"""String-array-handling code for PyOpenGL
-"""
+"""String-array-handling code for PyOpenGL"""
 
 from OpenGL.raw.GL import _types
 from OpenGL.raw.GL.VERSION import GL_1_1
@@ -56,6 +55,8 @@ class StringHandler(formathandler.FormatHandler):
         """Convert given value to an array value of given typeCode"""
         if isinstance(value, bytes):
             return value
+        elif hasattr(value, 'tobytes'):
+            return value.tobytes()
         elif hasattr(value, 'tostring'):
             return value.tostring()
         elif hasattr(value, 'raw'):
