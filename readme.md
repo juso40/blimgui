@@ -127,3 +127,24 @@ Creating a custom theme is all about defining style properties in a simple text 
 
 ### 💖 Theme Contributions
 Created an awesome theme? Share it! Submit a `.txt` file via a Pull Request to the [`themes`](./themes) folder on GitHub.
+
+## Contributing
+To develop locally, you need to provide the `blimgui/dist32` and `blimgui/dist64` folders - this
+repo doesn't contain them. There are two easy ways:
+
+- Copy them from the release zip.
+
+- Run the `populate_dist.py` script. This will take several minutes. Note it may require a local C
+  compiler installed.
+
+  This script also allows you to upgrade the dist folders to a newer Python version.
+
+Once you have the dist folders, you can add this repo to your `unrealsdk.user.toml`:
+```toml
+[mod_manager]
+extra_folders = [
+    "<path>\\blimgui"
+]
+```
+
+Then any changes made in here will be directly available in game.
