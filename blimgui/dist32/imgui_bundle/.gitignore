@@ -1,9 +1,0 @@
-lib/
-include/
-/README.md
-*.dll
-*.lib
-*.pyd
-*.so
-*.dylib
-*.so.*
